@@ -19,7 +19,7 @@
   socket.on("connect", () => {
     console.log("✅ 接続成功");
   });
-  
+
   // メッセージ受信
   socket.on("message", (data) => {
     const log = document.getElementById("log");
@@ -28,6 +28,8 @@
     log.appendChild(p);
     // 常に最新のメッセージが見えるようにスクロール
     log.scrollTop = log.scrollHeight;
+    console.log(log);
+    console.log(p);
   });
 
   // メッセージ送信
