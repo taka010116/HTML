@@ -12,5 +12,4 @@ def index():
 @socketio.on("message")
 def handle_message(data):
     print("受信:", data)
-    emit("message", data, broadcast=True)  # 全員に送信
-
+    emit("message", {"msg": f"サーバーが受け取った: {data}"}, broadcast=True)
