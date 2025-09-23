@@ -1,26 +1,41 @@
 {% extends "base.html" %}
-{% block title %}通信対戦デモ{% endblock %}
+{% block title %}通信対戦掲示板{% endblock %}
 {% block content %}
-<h1>通信対戦デモ</h1>
-<div id="log"></div>
-<input id="msg" type="text" placeholder="メッセージを入力">
+<h1>通信対戦掲示板</h1>
+
+<!-- 受信エリア -->
+<div id="log" style="border:1px solid #333; padding:10px; width:400px; height:300px; overflow-y:scroll;">
+</div>
+
+<!-- 送信フォーム -->
+<input id="msg" type="text" placeholder="メッセージを入力" style="width:300px;">
 <button onclick="sendMessage()">送信</button>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
   const socket = io();
 
+  // メッセージ受信
   socket.on("message", (data) => {
     const log = document.getElementById("log");
     const p = document.createElement("p");
-    p.textContent = data.msg || data;
+    p.textContent = data.msg;
     log.appendChild(p);
+    // 常に最新のメッセージが見えるようにスクロール
+    log.scrollTop = log.scrollHeight;
   });
 
+  // メッセージ送信
   function sendMessage() {
     const msg = document.getElementById("msg").value;
+    if(msg.trim() === "") return;
     socket.emit("message", msg);
     document.getElementById("msg").value = "";
   }
+
+  // Enterキーでも送信
+  document.getElementById("msg").addEventListener("keydown", (e) => {
+    if(e.key === "Enter") sendMessage();
+  });
 </script>
 {% endblock %}
