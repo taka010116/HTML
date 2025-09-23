@@ -2,7 +2,8 @@ from flask import Blueprint, redirect, url_for, Flask, jsonify, render_template,
 #from flask_socketio import emit
 #from app import socketio
 
-main = Blueprint('main', __name__)
+#main = Blueprint('main', __name__)
+main = Blueprint("main", __name__, template_folder="templates")
 
 @main.route('/')
 def index():

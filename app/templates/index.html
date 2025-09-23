@@ -6,13 +6,14 @@
 <input id="msg" type="text" placeholder="メッセージを入力">
 <button onclick="sendMessage()">送信</button>
 
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
   const socket = io();
 
   socket.on("message", (data) => {
     const log = document.getElementById("log");
     const p = document.createElement("p");
-    p.textContent = data;
+    p.textContent = data.msg || data;
     log.appendChild(p);
   });
 
