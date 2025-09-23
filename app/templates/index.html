@@ -1,12 +1,25 @@
 {% extends "base.html" %}
+{% block title %}通信対戦デモ{% endblock %}
+{% block content %}
+<h1>通信対戦デモ</h1>
+<div id="log"></div>
+<input id="msg" type="text" placeholder="メッセージを入力">
+<button onclick="sendMessage()">送信</button>
 
-{% block body %}
+<script>
+  const socket = io();
 
-<tbody>
-    
-    <h1>RenderDEMO</h1>
-    
-</tbody>
+  socket.on("message", (data) => {
+    const log = document.getElementById("log");
+    const p = document.createElement("p");
+    p.textContent = data;
+    log.appendChild(p);
+  });
 
-
+  function sendMessage() {
+    const msg = document.getElementById("msg").value;
+    socket.emit("message", msg);
+    document.getElementById("msg").value = "";
+  }
+</script>
 {% endblock %}
