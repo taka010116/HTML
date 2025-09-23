@@ -15,6 +15,11 @@ def create_app():
     app.register_blueprint(main)
 
     socketio.init_app(app)
+
+    @socketio.on("message")
+    def handle_message(data):
+        print("受信:", data)
+        socketio.emit("message", {"msg": f"サーバーが受け取った: {data}"}, broadcast=True)
     return app
 
 app = create_app()
