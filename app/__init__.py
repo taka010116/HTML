@@ -34,19 +34,32 @@ def handle_join(data):
     waiting_rooms[password].append(request.sid)
 
     players = waiting_rooms[password]
+    leader_sid = players[0]
 
     if len(players) == 1:
         # 1人目 → 待機
-        emit("login_result", {"status": "waiting"})
+        emit("login_result", {"status": "waiting", "isLeader": True, "name": f"Player{len(players)}"})
     elif len(players) == 2:
-        # 2人揃った → 接続完了
-        for sid in players:
-            emit("login_result", {"status": "ready"}, room=sid)
+        for i, sid in enumerate(players):
+            is_leader = (sid == leader_sid)
+            emit("login_result", {
+                "status": "ready",
+                "isLeader": is_leader,
+                "name": f"Player{i+1}"
+            }, room=sid)
         broadcast_players(password)
 
 def broadcast_players(password):
     players = waiting_rooms.get(password, [])
-    emit("update_players", {"players": players}, room=password)
+    player_names = [f"Player{i+1}" for i in range(len(players))]
+    emit("update_players", {"players": player_names}, to=players)
+
+@socketio.on("start_game")
+def handle_start(data):
+    password = data.get("password")
+    players = waiting_rooms.get(password, [])
+    for sid in players:
+        emit("game_start", {}, room=sid)
 
 @socketio.on("disconnect")
 def handle_disconnect():

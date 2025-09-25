@@ -6,6 +6,7 @@
   <style>
     body { font-family: sans-serif; }
     #login, #lobby { display: none; }
+    #startBtn { display: none; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -18,8 +19,10 @@
   </div>
 
   <div id="lobby">
-    <h2 id="lobbyMsg">ロビーに入りました！</h2>
+    <h2>ロビー</h2>
+    <p>プレイヤー一覧:</p>
     <ul id="players"></ul>
+    <button id="startBtn">開始！</button>
   </div>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -29,31 +32,34 @@
     const passwordInput = document.getElementById('password');
     const enterBtn = document.getElementById('enterBtn');
     const loginMsg = document.getElementById('loginMsg');
-    const lobbyMsg = document.getElementById('lobbyMsg');
     const playersList = document.getElementById('players');
+    const startBtn = document.getElementById('startBtn');
 
     const socket = io();
+    let currentPassword = "";
+    let isLeader = false;
+
     loginDiv.style.display = 'block';
 
-    // 合言葉送信
     enterBtn.addEventListener('click', () => {
-      socket.emit("join", { password: passwordInput.value });
+      currentPassword = passwordInput.value;
+      socket.emit("join", { password: currentPassword });
     });
 
-    // サーバーからの応答
     socket.on("login_result", (data) => {
-      if (data.status === "waiting") {
-        loginMsg.textContent = "接続中... もう一人を待っています";
-      } else if (data.status === "ready") {
+      if(data.status === "waiting"){
+        loginMsg.textContent = "接続中...";
+      }
+      if(data.status === "ready"){
         loginDiv.style.display = 'none';
         lobbyDiv.style.display = 'block';
-        lobbyMsg.textContent = "接続完了！ロビーに入りました！";
-      } else if (data.status === "error") {
-        loginMsg.textContent = "あいことばが違います！";
+        isLeader = data.isLeader;
+        if(isLeader){
+          startBtn.style.display = 'block';
+        }
       }
     });
 
-    // プレイヤー一覧更新
     socket.on("update_players", (data) => {
       playersList.innerHTML = '';
       data.players.forEach(p => {
@@ -61,6 +67,16 @@
         li.textContent = p;
         playersList.appendChild(li);
       });
+    });
+
+    startBtn.addEventListener('click', () => {
+      if(isLeader){
+        socket.emit("start_game", { password: currentPassword });
+      }
+    });
+
+    socket.on("game_start", () => {
+      window.location.href = "/game1.html";
     });
   </script>
 </body>
