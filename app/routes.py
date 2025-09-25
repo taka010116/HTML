@@ -14,7 +14,7 @@ def index():
 def game():
     return render_template("game.html")
 
-@main.route("/")
+@main.route("/game1")
 def game1():
     return render_template("game1.html")
 """
