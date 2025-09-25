@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>カードゲーム</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; }
+    .cards { display: flex; justify-content: center; gap: 10px; margin: 20px; }
+    .card {
+      width: 60px; height: 90px; border: 1px solid #333;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; cursor: pointer;
+    }
+    .selected { background: yellow; }
+  </style>
+</head>
+<body>
+  <h1>カードゲーム</h1>
+  <div id="info"></div>
+  <div class="cards" id="cards"></div>
+  <button id="submitBtn" style="display:none;">決定</button>
+  <div id="result"></div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io();
+    let role = null;
+    let currentPassword = localStorage.getItem("password") || ""; // ロビーから持ってくる
+    let selected = [];
+    let cards = [];
+
+    const cardsDiv = document.getElementById("cards");
+    const info = document.getElementById("info");
+    const result = document.getElementById("result");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // 親用
+    socket.on("show_cards_parent", (data) => {
+      role = "parent";
+      cards = data.cards;
+      info.textContent = "あなたは親です。2枚選んでください";
+      renderCards(cards);
+      submitBtn.style.display = "inline";
+    });
+
+    // 子用
+    socket.on("show_cards_child", (data) => {
+      role = "child";
+      cards = data.cards;
+      info.textContent = "あなたは子です。2枚選んでください";
+      renderCards(cards);
+      submitBtn.style.display = "inline";
+    });
+
+    function renderCards(cards){
+      cardsDiv.innerHTML = "";
+      selected = [];
+      cards.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.textContent = c;
+        div.onclick = () => toggleSelect(c, div);
+        cardsDiv.appendChild(div);
+      });
+    }
+
+    function toggleSelect(card, div){
+      if(selected.includes(card)){
+        selected = selected.filter(c => c !== card);
+        div.classList.remove("selected");
+      } else {
+        if(selected.length < 2){
+          selected.push(card);
+          div.classList.add("selected");
+        }
+      }
+    }
+
+    submitBtn.onclick = () => {
+      if(selected.length !== 2){
+        alert("2枚選んでください");
+        return;
+      }
+      if(role === "parent"){
+        socket.emit("parent_choice", { password: currentPassword, chosen: selected, cards });
+        info.textContent = "選択しました。子の番です。";
+      } else if(role === "child"){
+        socket.emit("child_choice", { password: currentPassword, chosen: selected });
+        info.textContent = "選択しました。結果を待っています。";
+      }
+      submitBtn.style.display = "none";
+    };
+
+    socket.on("round_result", (data) => {
+      result.innerHTML = `
+        親の選択: ${data.parent_choice.join(", ")}<br>
+        子の選択: ${data.child_choice.join(", ")}<br>
+        子の得点: ${data.score_child}
+      `;
+    });
+
+    // ゲーム開始時に親が自動でラウンド開始
+    socket.emit("start_round", { password: currentPassword });
+  </script>
+</body>
+</html>
