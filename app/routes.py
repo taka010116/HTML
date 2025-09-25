@@ -17,6 +17,8 @@ def game():
 @main.route("/game1")
 def game1():
     return render_template("game1.html")
+
+
 """
 @socketio.on("message")
 def handle_message(data):
