@@ -18,46 +18,50 @@
   </div>
 
   <div id="lobby">
-    <h2>ロビーに入りました！</h2>
+    <h2 id="lobbyMsg">ロビーに入りました！</h2>
     <ul id="players"></ul>
   </div>
+
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
   <script>
-
     const loginDiv = document.getElementById('login');
     const lobbyDiv = document.getElementById('lobby');
     const passwordInput = document.getElementById('password');
     const enterBtn = document.getElementById('enterBtn');
     const loginMsg = document.getElementById('loginMsg');
+    const lobbyMsg = document.getElementById('lobbyMsg');
     const playersList = document.getElementById('players');
 
     const socket = io();
     loginDiv.style.display = 'block';
 
-    //const socket = new WebSocket("wss://あなたの-renderドメイン/ws");
-
+    // 合言葉送信
     enterBtn.addEventListener('click', () => {
-    socket.emit("join", { password: passwordInput.value });
-  });
-
-  socket.on("login_result", (data) => {
-    if(data.success){
-      loginDiv.style.display = 'none';
-      lobbyDiv.style.display = 'block';
-    } else {
-      loginMsg.textContent = "あいことばが違います！";
-    }
-  });
-
-  socket.on("update_players", (data) => {
-    playersList.innerHTML = '';
-    data.players.forEach(p => {
-      const li = document.createElement('li');
-      li.textContent = p;
-      playersList.appendChild(li);
+      socket.emit("join", { password: passwordInput.value });
     });
-  });
+
+    // サーバーからの応答
+    socket.on("login_result", (data) => {
+      if (data.status === "waiting") {
+        loginMsg.textContent = "接続中... もう一人を待っています";
+      } else if (data.status === "ready") {
+        loginDiv.style.display = 'none';
+        lobbyDiv.style.display = 'block';
+        lobbyMsg.textContent = "接続完了！ロビーに入りました！";
+      } else if (data.status === "error") {
+        loginMsg.textContent = "あいことばが違います！";
+      }
+    });
+
+    // プレイヤー一覧更新
+    socket.on("update_players", (data) => {
+      playersList.innerHTML = '';
+      data.players.forEach(p => {
+        const li = document.createElement('li');
+        li.textContent = p;
+        playersList.appendChild(li);
+      });
+    });
   </script>
 </body>
 </html>
