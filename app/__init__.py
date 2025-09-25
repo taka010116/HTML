@@ -1,9 +1,9 @@
 import os
 from flask import Flask
 from .routes import main
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from config import Config
-from app import socketio
+#from app import socketio
 
 #socketio = SocketIO(cors_allowed_origins="*")
 #socketio = SocketIO()
@@ -23,6 +23,7 @@ def create_app():
     return app
 
 app = create_app()
+
 @socketio.on("message")
 def handle_message(data):
     print("受信:", data)
