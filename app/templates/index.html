@@ -4,7 +4,7 @@
 <h1>通信対戦掲示板</h1>
 
 <!-- 受信エリア -->
-<div id="log" style="border:1px solid #333; padding:10px; width:400px; height:300px; overflow-y:scroll;">
+<!-- <div id="log" style="border:1px solid #333; padding:10px; width:400px; height:300px; overflow-y:scroll;">
 </div>
 
 <a href="{{ url_for('main.game') }}"><button class="btn">ゲームを開始する</button></a>
@@ -15,10 +15,10 @@
   <li>図形をクリックして選択 → 矢印キーで移動</li>
   <li><strong>Delete / Backspace</strong>：選択図形を削除</li>
 </ul>
+-->
 <!-- 送信フォーム -->
 <input id="msg" type="text" placeholder="メッセージを入力" style="width:300px;">
 <button onclick="sendMessage()">送信</button>
-
 <div class="green-box">
   <a href="/me" data-desc="私の自己紹介ページです。">・me</a>
   <a href="/temp" data-desc="仮のリンクです。">・仮</a>
@@ -48,7 +48,7 @@
       descBox.textContent = "カーソルを合わせると説明がここに表示されます。";
     });
   });
-  
+
   socket.on("connect", () => {
     console.log("✅ 接続成功");
   });
