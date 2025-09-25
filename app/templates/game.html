@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}ゲーム画面{% endblock %}
+
+{% block head %}
+<style>
+  #game-area { border: 1px solid #333; background: #fafafa; display:block; margin-bottom:10px; }
+  #hud { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  #info { font-size:14px; color:#333; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>ゲーム画面（通信デモ付き）</h1>
+
+<div id="hud">
+  <div>
+    <button id="addBtn" class="btn">ランダム図形を追加 (Space)</button>
+    <button id="clearBtn" class="btn">全削除</button>
+    <a href="{{ url_for('main.index') }}"><button class="btn">トップへ戻る</button></a>
+  </div>
+  <div id="info">選択: <span id="selInfo">なし</span></div>
+</div>
+
+<canvas id="game-area" width="800" height="500"></canvas>
+<p>操作: クリックで選択 → 矢印キーで移動 / Deleteで削除</p>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+(() => {
+  const socket = io();
+
+  const canvas = document.getElementById('game-area');
+  const ctx = canvas.getContext('2d');
+  const addBtn = document.getElementById('addBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const selInfo = document.getElementById('selInfo');
+
+  let shapes = [];
+  let selectedId = null;
+  let nextId = 1;
+
+  function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function randColor(){ return `hsl(${randInt(0,360)} ${randInt(60,90)}% ${randInt(45,65)}%)`; }
+
+  class Shape {
+    constructor(id, type, x, y, w, h, color){
+      this.id = id;
+      this.type = type;
+      this.x = x; this.y = y;
+      this.w = w; this.h = h;
+      this.color = color;
+    }
+    draw(ctx, isSelected=false){
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.strokeStyle = isSelected ? '#000' : 'transparent';
+      ctx.lineWidth = isSelected ? 3 : 0;
+      if(this.type === 'rect'){
+        ctx.fillRect(this.x - this.w/2, this.y - this.h/2, this.w, this.h);
+        if(isSelected) ctx.strokeRect(this.x - this.w/2, this.y - this.h/2, this.w, this.h);
+      } else if(this.type === 'circle'){
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.w/2, 0, Math.PI*2);
+        ctx.fill();
+        if(isSelected) ctx.stroke();
+      }
+      ctx.restore();
+    }
+    contains(px, py){
+      if(this.type === 'rect'){
+        return px >= this.x - this.w/2 && px <= this.x + this.w/2 &&
+               py >= this.y - this.h/2 && py <= this.y + this.h/2;
+      } else if(this.type === 'circle'){
+        const dx = px - this.x, dy = py - this.y;
+        return dx*dx + dy*dy <= (this.w/2)*(this.w/2);
+      }
+      return false;
+    }
+  }
+
+  function render(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(const s of shapes){
+      s.draw(ctx, s.id === selectedId);
+    }
+  }
+
+  // --- ローカル操作 ---
+  function addRandomShape(){
+    const types = ['rect','circle'];
+    const t = types[randInt(0, types.length-1)];
+    const w = randInt(30, 90);
+    const h = randInt(30, 90);
+    const x = randInt(w/2 + 10, canvas.width - w/2 - 10);
+    const y = randInt(h/2 + 10, canvas.height - h/2 - 10);
+    const id = nextId++;
+    const shape = new Shape(id, t, x, y, w, h, randColor());
+    shapes.push(shape);
+    render();
+    socket.emit("add_shape", shape);
+  }
+
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    let found = null;
+    for(let i = shapes.length - 1; i >= 0; i--){
+      if(shapes[i].contains(px, py)){
+        found = shapes[i];
+        break;
+      }
+    }
+    if(found){
+      selectedId = found.id;
+      selInfo.textContent = `${found.type} #${found.id}`;
+    } else {
+      selectedId = null;
+      selInfo.textContent = 'なし';
+    }
+    render();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if(selectedId !== null){
+      const s = shapes.find(x => x.id === selectedId);
+      if(!s) return;
+      const step = 5;
+      if(e.key === 'ArrowLeft'){ s.x -= step; socket.emit("move_shape", s); }
+      if(e.key === 'ArrowRight'){ s.x += step; socket.emit("move_shape", s); }
+      if(e.key === 'ArrowUp'){ s.y -= step; socket.emit("move_shape", s); }
+      if(e.key === 'ArrowDown'){ s.y += step; socket.emit("move_shape", s); }
+      if(e.key === 'Delete' || e.key === 'Backspace'){
+        shapes = shapes.filter(x => x.id !== selectedId);
+        socket.emit("delete_shape", {id:selectedId});
+        selectedId = null;
+        selInfo.textContent = 'なし';
+      }
+      render();
+    }
+    if(e.code === 'Space'){
+      e.preventDefault();
+      addRandomShape();
+    }
+  });
+
+  addBtn.addEventListener('click', addRandomShape);
+  clearBtn.addEventListener('click', () => {
+    shapes = []; selectedId = null; selInfo.textContent = 'なし'; render();
+    socket.emit("clear_shapes");
+  });
+
+  // --- サーバーから受信 ---
+  socket.on("add_shape", (data) => {
+    if(shapes.some(s => s.id === data.id)) return;
+    shapes.push(new Shape(data.id, data.type, data.x, data.y, data.w, data.h, data.color));
+    render();
+  });
+
+  socket.on("move_shape", (data) => {
+    const s = shapes.find(x => x.id === data.id);
+    if(s){ s.x=data.x; s.y=data.y; render(); }
+  });
+
+  socket.on("delete_shape", (data) => {
+    shapes = shapes.filter(x => x.id !== data.id);
+    if(selectedId === data.id){ selectedId=null; selInfo.textContent='なし'; }
+    render();
+  });
+
+  socket.on("clear_shapes", () => {
+    shapes = []; selectedId = null; selInfo.textContent = 'なし'; render();
+  });
+
+  render();
+})();
+</script>
+{% endblock %}

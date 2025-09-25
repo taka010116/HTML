@@ -10,6 +10,10 @@ def index():
     
     return render_template('index.html')
 
+@main.route("/game")
+def game():
+    return render_template("game.html")
+
 """
 @socketio.on("message")
 def handle_message(data):

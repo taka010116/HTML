@@ -7,6 +7,14 @@
 <div id="log" style="border:1px solid #333; padding:10px; width:400px; height:300px; overflow-y:scroll;">
 </div>
 
+<a href="{{ url_for('main.game') }}"><button class="btn">ゲームを開始する</button></a>
+<hr>
+<p>追加の操作</p>
+<ul>
+  <li>ゲーム画面で <strong>Space</strong>：ランダム図形を追加</li>
+  <li>図形をクリックして選択 → 矢印キーで移動</li>
+  <li><strong>Delete / Backspace</strong>：選択図形を削除</li>
+</ul>
 <!-- 送信フォーム -->
 <input id="msg" type="text" placeholder="メッセージを入力" style="width:300px;">
 <button onclick="sendMessage()">送信</button>
