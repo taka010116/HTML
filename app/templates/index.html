@@ -19,11 +19,36 @@
 <input id="msg" type="text" placeholder="メッセージを入力" style="width:300px;">
 <button onclick="sendMessage()">送信</button>
 
+<div class="green-box">
+  <a href="/me" data-desc="私の自己紹介ページです。">・me</a>
+  <a href="/temp" data-desc="仮のリンクです。">・仮</a>
+  <a href="/game" data-desc="作成したゲームを紹介します。">・my game</a>
+  <a href="/blog" data-desc="ブログ記事を読むことができます。">・blog</a>
+  <a href="/other" data-desc="その他のリンクです。">・</a>
+</div>
+
+<div class="blue-box" id="desc-box">
+  カーソルを合わせると説明がここに表示されます。
+</div>
+
+</div>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
   //const socket = io();
   const socket = io(window.location.origin);
 
+  const links = document.querySelectorAll(".green-box a");
+  const descBox = document.getElementById("desc-box");
+
+  links.forEach(link => {
+    link.addEventListener("mouseover", () => {
+      descBox.textContent = link.dataset.desc;
+    });
+    link.addEventListener("mouseout", () => {
+      descBox.textContent = "カーソルを合わせると説明がここに表示されます。";
+    });
+  });
+  
   socket.on("connect", () => {
     console.log("✅ 接続成功");
   });

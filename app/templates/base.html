@@ -3,6 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}通信対戦デモ{% endblock %}</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .green-box {
+      background-color: #c7e3b7;
+      border: 1px solid #8dbf70;
+      width: 300px;
+      padding: 20px;
+      margin: 50px;
+      font-size: 18px;
+    }
+
+    .green-box a {
+      display: block;
+      margin: 10px 0;
+      text-decoration: none;
+      color: black;
+      transition: color 0.2s;
+    }
+
+    .green-box a:hover {
+      color: darkgreen;
+      font-weight: bold;
+    }
+
+    .blue-box {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      height: 200px;
+      background-color: #8daee3;
+      border: 1px solid #5a82c3;
+      padding: 10px;
+      box-sizing: border-box;
+      font-size: 16px;
+      color: white;
+    }
+  </style>
+  
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
