@@ -1,9 +1,11 @@
 import os
 from flask import Flask, request
 from .routes import main
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 from config import Config
 import random
+
+rooms = {}
 
 socketio = SocketIO(cors_allowed_origins="*")
 
@@ -121,6 +123,41 @@ def handle_child_choice(data):
             "child_choice": chosen,
             "score_child": score
         }, room=sid)
+
+@socketio.on("join_game")
+def handle_join_game(data):
+    password = data["password"]
+    join_room(password)
+
+    # 親がいなければこの人をリーダーに
+    if password not in rooms:
+        rooms[password] = {"leader": request.sid, "choices": {}}
+        emit("role", {"isLeader": True})
+    else:
+        emit("role", {"isLeader": False})
+
+@socketio.on("cards_generated")
+def handle_cards(data):
+    password = data["password"]
+    cards = data["cards"]
+    emit("show_cards", {"cards": cards}, room=password)
+
+@socketio.on("submit_choice")
+def handle_choice(data):
+    password = data["password"]
+    choice = data["choice"]
+    room = rooms[password]
+    role = "parent" if request.sid == room["leader"] else "child"
+    room["choices"][role] = choice
+
+    # 両方揃ったら結果判定
+    if "parent" in room["choices"] and "child" in room["choices"]:
+        parent = room["choices"]["parent"]
+        child = room["choices"]["child"]
+        # スコア計算
+        score = sum(c for c in child if c not in parent)
+        emit("game_result", {"parent": parent, "child": child, "score": score}, room=password)
+        room["choices"] = {}
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000)
