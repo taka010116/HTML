@@ -39,7 +39,7 @@
     let cardNumbers = [];
 
     // ゲーム参加
-    //socket.emit("join_game", { password: currentPassword });
+    socket.emit("join_game", { password: currentPassword });
 
     socket.on("role", data => {
       isLeader = data.isLeader;
