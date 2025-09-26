@@ -132,9 +132,9 @@ def handle_join_game(data):
     # 親がいなければこの人をリーダーに
     if password not in rooms:
         rooms[password] = {"leader": request.sid, "choices": {}}
-        emit("role", {"isLeader": True})
+        emit("role", {"isLeader": True}, room=request.sid)
     else:
-        emit("role", {"isLeader": False})
+        emit("role", {"isLeader": False}, room=request.sid)
 
 # 親の選択
 @socketio.on("parent_choice")
