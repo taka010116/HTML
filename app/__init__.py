@@ -136,6 +136,39 @@ def handle_join_game(data):
     else:
         emit("role", {"isLeader": False})
 
+# 親の選択
+@socketio.on("parent_choice")
+def handle_parent_choice(data):
+    password = data["password"]
+    cards = data["cards"]
+    choice = data["choice"]
+
+    room = rooms[password]
+    room["cards"] = cards
+    room["choices"]["parent"] = choice
+
+    # 子にカードを送る
+    emit("show_cards", {"cards": cards}, room=password, include_self=False)
+
+
+# 子の選択
+@socketio.on("child_choice")
+def handle_child_choice(data):
+    password = data["password"]
+    choice = data["choice"]
+
+    room = rooms[password]
+    room["choices"]["child"] = choice
+
+    if "parent" in room["choices"] and "child" in room["choices"]:
+        parent = room["choices"]["parent"]
+        child = room["choices"]["child"]
+        score = sum(c for c in child if c not in parent)
+
+        emit("game_result", {"parent": parent, "child": child, "score": score}, room=password)
+        room["choices"] = {}
+
+
 @socketio.on("cards_generated")
 def handle_cards(data):
     password = data["password"]

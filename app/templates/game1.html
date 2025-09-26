@@ -14,6 +14,7 @@
       background-color: white;
     }
     .selected { background-color: lightblue; }
+    #submitBtn { margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -30,33 +31,33 @@
     const status = document.getElementById("status");
 
     let isLeader = false;
-    let currentPassword = localStorage.getItem("password"); // ロビーで保存した合言葉
+    let currentPassword = localStorage.getItem("password");
     let selectedCards = [];
     let cardNumbers = [];
 
-    // 役割をサーバーから通知
+    // ゲーム参加
     socket.emit("join_game", { password: currentPassword });
 
     socket.on("role", data => {
       isLeader = data.isLeader;
       if(isLeader){
-        status.textContent = "あなたは親です。カードを選んでください。";
-        // 親がカードを生成して送る
+        status.textContent = "あなたは親です。カードを2枚選んでください。";
+        // 親だけがカードを生成＆表示
         cardNumbers = generateCards();
-        socket.emit("cards_generated", { password: currentPassword, cards: cardNumbers });
         renderCards(cardNumbers);
       } else {
-        status.textContent = "あなたは子です。親のカード待ち…";
+        status.textContent = "あなたは子です。親の選択待ち…";
       }
     });
 
-    // 親が作ったカードを受け取る
+    // 子にカードが送られてきた
     socket.on("show_cards", data => {
       cardNumbers = data.cards;
       renderCards(cardNumbers);
-      status.textContent = isLeader ? "カードを2枚選んでください" : "カードを2枚選んでください";
+      status.textContent = "カードを2枚選んでください。";
     });
 
+    // 親・子共通: 選択
     function renderCards(numbers){
       cardsDiv.innerHTML = "";
       numbers.forEach(num => {
@@ -81,17 +82,26 @@
       submitBtn.disabled = (selectedCards.length !== 2);
     }
 
+    // 選択送信
     submitBtn.addEventListener("click", () => {
-      socket.emit("submit_choice", { password: currentPassword, choice: selectedCards });
-      status.textContent = "相手の選択待ち…";
+      if(isLeader){
+        // 親 → 自分の選択とカードをサーバーに送る
+        socket.emit("parent_choice", { password: currentPassword, cards: cardNumbers, choice: selectedCards });
+        status.textContent = "子の選択待ち…";
+      } else {
+        // 子 → 自分の選択を送る
+        socket.emit("child_choice", { password: currentPassword, choice: selectedCards });
+        status.textContent = "親と子の結果を待ち…";
+      }
       submitBtn.disabled = true;
     });
 
     // 結果を表示
     socket.on("game_result", data => {
-      status.textContent = `結果: 親の選択 ${data.parent}, 子の選択 ${data.child}, 子の得点: ${data.score}`;
+      status.textContent = `結果: 親 ${data.parent}, 子 ${data.child}, 子の得点: ${data.score}`;
     });
 
+    // 1〜9のランダム4枚（重複なし）
     function generateCards(){
       let nums = [];
       while(nums.length < 4){
