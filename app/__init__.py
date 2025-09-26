@@ -137,6 +137,7 @@ def handle_join_game(data):
         emit("role", {"isLeader": False}, room=request.sid)
 
 # 親の選択
+"""
 @socketio.on("parent_choice")
 def handle_parent_choice(data):
     password = data["password"]
@@ -167,7 +168,7 @@ def handle_child_choice(data):
 
         emit("game_result", {"parent": parent, "child": child, "score": score}, room=password)
         room["choices"] = {}
-
+"""
 
 @socketio.on("cards_generated")
 def handle_cards(data):
