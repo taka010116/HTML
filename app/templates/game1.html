@@ -57,6 +57,7 @@
 
     // 子にカードが送られてきた
     socket.on("show_cards", data => {
+      console.log("data : " , data);
       cardNumbers = data.cards;
       renderCards(cardNumbers);
       status.textContent = "カードを2枚選んでください。";
@@ -93,6 +94,7 @@
         // 親 → 自分の選択とカードをサーバーに送る
         socket.emit("parent_choice", { password: currentPassword, cards: cardNumbers, choice: selectedCards });
         status.textContent = "子の選択待ち…";
+        console.log("サーバーに送信した");
       } else {
         // 子 → 自分の選択を送る
         socket.emit("child_choice", { password: currentPassword, choice: selectedCards });
