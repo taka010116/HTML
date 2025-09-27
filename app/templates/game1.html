@@ -58,6 +58,7 @@
     // 子にカードが送られてきた
     socket.on("show_cards", data => {
       console.log("data : " , data);
+      console.log("show_cards まで");
       cardNumbers = data.cards;
       renderCards(cardNumbers);
       status.textContent = "カードを2枚選んでください。";

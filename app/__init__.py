@@ -128,15 +128,22 @@ def handle_child_choice(data):
 @socketio.on("join_game")
 def handle_join_game(data):
     password = data["password"]
+    sid = request.sid
     join_room(password)
 
     # 親がいなければこの人をリーダーに
     if password not in rooms:
         rooms[password] = {"leader": request.sid, "choices": {}}
-        emit("role", {"isLeader": True}, room=request.sid)
+        emit("role", {"role": "parent"}, room=sid)
     else:
-        emit("role", {"isLeader": False}, room=request.sid)
-
+        room = rooms[password]
+        if room["child"] is None:
+            # 子として登録
+            room["child"] = sid
+            emit("role", {"role": "child"}, room=sid)
+        else:
+            # 親と子が揃っていたら満員扱い
+            emit("error", {"message": "この部屋はすでに満員です"}, room=sid)
 
 @socketio.on("cards_generated")
 def handle_cards(data):
