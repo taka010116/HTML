@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>カードゲーム</title>
+  <title>test</title>
   <style>
     body { font-family: sans-serif; text-align: center; }
     #cards { display: flex; justify-content: center; margin: 20px; }
@@ -40,7 +40,7 @@
 
     // ゲーム参加
     socket.emit("join_game", { password: currentPassword });
-
+    console.log("join game ");
     socket.on("role", data => {
       isLeader = data.isLeader;
       console.log("role 受信 : ", data);
