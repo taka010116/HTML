@@ -37,7 +37,10 @@ def handle_join(data):
 
     # rooms にも部屋情報を作成
     if password not in rooms:
-        rooms[password] = {"in_progress": False, "choices": {}}
+        rooms[password] = {
+            "in_progress": False,
+            "choices": {},
+        }
 
     players = waiting_rooms[password]
     leader_sid = players[0]
@@ -65,6 +68,10 @@ def broadcast_players(password):
 def handle_start(data):
     password = data.get("password")
     room = rooms.get(password)
+    if not password:
+        emit("error", {"message": "パスワードが指定されていません"}, room=request.sid)
+        return
+    
     if not room:
         emit("error", {"message": "この部屋は存在しません"}, room=request.sid)
         return
@@ -75,8 +82,9 @@ def handle_start(data):
 
     room["in_progress"] = True  # このゲームは進行中
     players = waiting_rooms.get(password, [])
-    if players:
-        emit("game_start", {}, room=password)
+    #if players:
+    emit("game_start", {}, room=password)
+    print("game Start!")
 
 #終わり
 @socketio.on("end_round")
