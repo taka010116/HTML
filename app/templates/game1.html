@@ -41,7 +41,7 @@
     // ゲーム参加
     socket.emit("join_game", { password: currentPassword });
     console.log("join game ");
-    
+
     socket.on("role", data => {
       console.log("role 受信 : ", data);
       isLeader = data.isLeader;   // True/False が必ず入るようになる
@@ -105,11 +105,25 @@
         console.log("サーバーに送信した");
       } else {
         // 子 → 自分の選択を送る
-        socket.emit("child_choice", { password: currentPassword, choice: selectedCards });
+        const chosen = Array.from(document.querySelectorAll(".card.selected")).map(c => c.textContent);
+        socket.emit("child_choice", { password: currentPassword, chosen: chosen });
+        //socket.emit("child_choice", { password: currentPassword, choice: selectedCards });
         status.textContent = "親と子の結果を待ち…";
       }
       submitBtn.disabled = true;
     });
+
+    socket.on("round_result", (data) => {
+      const { parent_choice, child_choice, score_child } = data;
+      resultDiv.innerHTML = `
+        <p>親の選んだカード: ${parent_choice.join(", ")}</p>
+        <p>子の選んだカード: ${child_choice.join(", ")}</p>
+        <p>子の得点: ${score_child}</p>
+      `;
+      console.log("子の得点", score_child);
+      console.log("親の選択", parent_choice);
+    });
+
 
     // 結果を表示
     socket.on("game_result", data => {

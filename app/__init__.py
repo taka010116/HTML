@@ -115,6 +115,11 @@ def handle_child_choice(data):
     password = data.get("password")
     chosen = data.get("chosen", [])
     players = waiting_rooms.get(password, [])
+
+    if len(players) < 2:
+        print("プレイヤー不足child_choice")
+        return 
+    
     round_data = waiting_rooms.get("round_data", {}).get(password, {})
 
     parent_choice = round_data.get("parent_choice", [])
@@ -131,6 +136,14 @@ def handle_child_choice(data):
             "child_choice": chosen,
             "score_child": score
         }, room=sid)
+    result = {
+        "parent_choice": parent_choice,
+        "child_choice": chosen,
+        "score_child": score
+    }
+    emit("round_result", result, room=password)
+    print(f"[DEBUG] 結果送信 parent={parent_choice}, child={chosen}, score={score} (room={password})")
+
 
 @socketio.on("join_game")
 def handle_join_game(data):
