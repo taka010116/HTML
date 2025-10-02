@@ -27,7 +27,7 @@ app = create_app()
 def handle_join(data):
     password = data.get("password")
     if not password:
-        emit("login_result", {"status": "error"})
+        emit("login_result", {"status": "error"}, room=request.sid)
         return
 
     # waiting_rooms に追加
@@ -41,13 +41,14 @@ def handle_join(data):
             "in_progress": False,
             "choices": {},
         }
+    join_room(password)
 
     players = waiting_rooms[password]
     leader_sid = players[0]
 
     if len(players) == 1:
-        emit("login_result", {"status": "waiting", "isLeader": True, "name": f"Player{len(players)}"})
-    elif len(players) == 2:
+        emit("login_result", {"status": "waiting", "isLeader": True, "name": f"Player{len(players)}"}, room=request.sid)
+    else:
         for i, sid in enumerate(players):
             is_leader = (sid == leader_sid)
             emit("login_result", {
