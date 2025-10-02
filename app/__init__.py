@@ -124,7 +124,7 @@ def handle_child_choice(data):
     parent_choice = round_data.get("parent_choice", [])
 
     # 採点：子のカード合計、ただし親が選んだカードは無効
-    score = sum(c for c in chosen if c not in parent_choice)
+    score = sum(int(c) for c in chosen if c not in map(int, parent_choice))
 
     # 両者に結果を通知
     result = {
