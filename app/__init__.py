@@ -181,6 +181,7 @@ def handle_parent_choice(data):
     child_sid = players[1]
     emit("show_cards", {"cards": cards, "parent_choice" : chosen}, room=child_sid)
     print("カード送信OK")
+    #te
 
 @socketio.on("child_choice")
 def handle_child_choice(data):
