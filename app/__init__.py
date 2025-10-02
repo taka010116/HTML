@@ -40,12 +40,26 @@ def handle_join(data):
         rooms[password] = {
             "in_progress": False,
             "choices": {},
+            "players": []
         }
+
+    if request.sid not in rooms[password]["players"]:
+        rooms[password]["players"].append(request.sid)
+    
     join_room(password)
 
-    players = waiting_rooms[password]
+    #players = waiting_rooms[password]
+    players = rooms[password]["players"]
     leader_sid = players[0]
 
+    for sid in players:
+        is_leader = (sid == leader_sid)
+        emit("login_result", {"status": "ready", "isLeader": is_leader}, room=sid)
+
+    # プレイヤーリスト更新
+    emit("update_players", {"players": players}, room=password)
+
+"""
     if len(players) == 1:
         emit("login_result", {"status": "waiting", "isLeader": True, "name": f"Player{len(players)}"}, room=request.sid)
     else:
@@ -58,6 +72,7 @@ def handle_join(data):
             }, room=sid)
         broadcast_players(password)
 
+"""
 
 def broadcast_players(password):
     players = waiting_rooms.get(password, [])
@@ -80,10 +95,14 @@ def handle_start(data):
     if room.get("in_progress"):
         emit("error", {"message": "ゲームは既に進行中です"}, room=request.sid)
         return
+    if room["in_progress"]:
+        emit("error", {"message": "ゲームは既に進行中です"}, room=request.sid)
+        return
 
     room["in_progress"] = True  # このゲームは進行中
-    players = waiting_rooms.get(password, [])
+    #players = waiting_rooms.get(password, [])
     #if players:
+    room["choices"] = {}
     emit("game_start", {}, room=password)
     print("game Start!")
 
@@ -96,6 +115,7 @@ def handle_end_round(data):
         room["in_progress"] = False
         room["choices"] = {}
 
+"""
 @socketio.on("disconnect")
 def handle_disconnect():
     for pw, sids in list(waiting_rooms.items()):
@@ -110,7 +130,16 @@ def handle_disconnect():
                 room = rooms[pw]
                 room["in_progress"] = False
                 room["choices"] = {}
+"""
 
+@socketio.on("disconnect")
+def handle_disconnect():
+    for password, room in list(rooms.items()):
+        if request.sid in room["players"]:
+            room["players"].remove(request.sid)
+            emit("update_players", {"players": room["players"]}, room=password)
+            if not room["players"]:  # 誰もいなければ部屋削除
+                del rooms[password]
 
 
 #game1
