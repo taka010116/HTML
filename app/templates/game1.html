@@ -63,6 +63,12 @@
       status.textContent = "カードを2枚選んでください。";
     });
 
+    socket.on("hide_cards", () => {
+      console.log("カードを隠した");
+      document.getElementById("cards-area").style.display = "none";
+    });
+
+
     // 親・子共通: 選択
     function renderCards(numbers){
       cardsDiv.innerHTML = "";
@@ -88,7 +94,7 @@
       submitBtn.disabled = (selectedCards.length !== 2);
     }
 
-    // 選択送信
+    // 選択送信ボタン
     submitBtn.addEventListener("click", () => {
       if(isLeader){
         // 親 → 自分の選択とカードをサーバーに送る

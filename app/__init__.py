@@ -84,6 +84,7 @@ def handle_start_round(data):
     leader_sid = players[0]
     emit("show_cards_parent", {"cards": cards}, room=leader_sid)
 
+
 @socketio.on("parent_choice")
 def handle_parent_choice(data):
     password = data.get("password")
@@ -99,9 +100,10 @@ def handle_parent_choice(data):
 
     # 子にカードを送る
     cards = data.get("cards", [])
+    parent_sid = players[0]
+    emit("hide_cards", {}, room=parent_sid)
     child_sid = players[1]
-    #emit("show_cards_child", {"cards": cards}, room=child_sid)
-    emit("show_cards", {"cards": cards}, room=password, include_self=False)
+    emit("show_cards", {"cards": cards}, room=child_sid)
 
 @socketio.on("child_choice")
 def handle_child_choice(data):
