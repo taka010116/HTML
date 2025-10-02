@@ -75,9 +75,9 @@ def handle_join(data):
 """
 
 def broadcast_players(password):
-    players = waiting_rooms.get(password, [])
+    players = rooms[password]["players"]
     player_names = [f"Player{i+1}" for i in range(len(players))]
-    emit("update_players", {"players": player_names}, to=players)
+    emit("update_players", {"players": player_names}, room=password)
 
 #最初
 @socketio.on("start_game")
@@ -134,11 +134,12 @@ def handle_disconnect():
 
 @socketio.on("disconnect")
 def handle_disconnect():
+    sid = request.sid
     for password, room in list(rooms.items()):
-        if request.sid in room["players"]:
-            room["players"].remove(request.sid)
+        if "players" in room and sid in room["players"]:
+            room["players"].remove(sid)
             emit("update_players", {"players": room["players"]}, room=password)
-            if not room["players"]:  # 誰もいなければ部屋削除
+            if not room["players"]:
                 del rooms[password]
 
 
