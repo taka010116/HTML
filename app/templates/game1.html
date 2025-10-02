@@ -55,11 +55,12 @@
 
 
     // 子にカードが送られてきた
-    socket.on("show_cards", data => {
+    socket.on("show_cards", (data) => {
       console.log("data : " , data);
       console.log("show_cards まで");
       cardNumbers = data.cards;
-      renderCards(cardNumbers);
+      //renderCards(cardNumbers);
+      renderCards(data.cards);
       status.textContent = "カードを2枚選んでください。";
     });
 

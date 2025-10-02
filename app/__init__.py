@@ -89,8 +89,8 @@ def handle_start_round(data):
 def handle_parent_choice(data):
     password = data.get("password")
     players = waiting_rooms.get(password, [])
-    if not players:
-        return
+    #if not players:
+    #    return
 
     chosen = data.get("chosen", [])
     # 親の選んだカードを保存しておく
