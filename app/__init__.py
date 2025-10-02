@@ -57,12 +57,30 @@ def broadcast_players(password):
     player_names = [f"Player{i+1}" for i in range(len(players))]
     emit("update_players", {"players": player_names}, to=players)
 
+#最初
 @socketio.on("start_game")
 def handle_start(data):
     password = data.get("password")
-    players = waiting_rooms.get(password, [])
-    for sid in players:
-        emit("game_start", {}, room=sid)
+    room = rooms.get(password)
+    if not room:
+        emit("error", {"message": "この部屋は存在しません"}, room=request.sid)
+        return
+    
+    if room.get("in_progress"):
+        emit("error", {"message": "ゲームは既に進行中です"}, room=request.sid)
+        return
+
+    room["in_progress"] = True  # このゲームは進行中
+    emit("game_start", {}, room=password)
+
+#終わり
+@socketio.on("end_round")
+def handle_end_round(data):
+    password = data.get("password")
+    room = rooms.get(password)
+    if room:
+        room["in_progress"] = False
+        room["choices"] = {}
 
 @socketio.on("disconnect")
 def handle_disconnect():
