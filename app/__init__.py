@@ -29,20 +29,21 @@ def handle_join(data):
     if not password:
         emit("login_result", {"status": "error"})
         return
-
+    print("joinにはいっている。")
     # 部屋がなければ作成
     if password not in waiting_rooms:
         waiting_rooms[password] = []
+    waiting_rooms[password].append(request.sid)
+
     if password not in rooms:
         rooms[password] = {"in_progress": False, "choices": {}}
 
-    waiting_rooms[password].append(request.sid)
+    #waiting_rooms[password].append(request.sid)
 
     players = waiting_rooms[password]
     leader_sid = players[0]
 
     if len(players) == 1:
-        # 1人目 → 待機
         emit("login_result", {"status": "waiting", "isLeader": True, "name": f"Player{len(players)}"})
     elif len(players) == 2:
         for i, sid in enumerate(players):
