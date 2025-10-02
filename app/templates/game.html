@@ -44,6 +44,7 @@
 
     enterBtn.addEventListener('click', () => {
       currentPassword = passwordInput.value;
+      console.log("開始ボタンを押しました。");
       socket.emit("join", { password: currentPassword });
     });
 
@@ -72,6 +73,7 @@
 
     startBtn.addEventListener('click', () => {
       if(isLeader){
+        console.log("開始ボタンを押しました！")
         socket.emit("start_game", { password: currentPassword });
       }
     });

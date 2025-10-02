@@ -29,16 +29,15 @@ def handle_join(data):
     if not password:
         emit("login_result", {"status": "error"})
         return
-    print("joinにはいっている。")
-    # 部屋がなければ作成
+
+    # waiting_rooms に追加
     if password not in waiting_rooms:
         waiting_rooms[password] = []
     waiting_rooms[password].append(request.sid)
 
+    # rooms にも部屋情報を作成
     if password not in rooms:
         rooms[password] = {"in_progress": False, "choices": {}}
-
-    #waiting_rooms[password].append(request.sid)
 
     players = waiting_rooms[password]
     leader_sid = players[0]
@@ -54,6 +53,7 @@ def handle_join(data):
                 "name": f"Player{i+1}"
             }, room=sid)
         broadcast_players(password)
+
 
 def broadcast_players(password):
     players = waiting_rooms.get(password, [])
