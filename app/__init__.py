@@ -134,7 +134,7 @@ def handle_child_choice(data):
     }
     for sid in players:
         emit("round_result", result, room=sid)
-
+    #test
     print(f"[DEBUG] 結果送信 parent={parent_choice}, child={chosen}, score={score} (room={password})")
 
 
