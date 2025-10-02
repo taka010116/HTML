@@ -147,77 +147,76 @@ def handle_disconnect():
 @socketio.on("start_round")
 def handle_start_round(data):
     password = data.get("password")
-    room = rooms.get(password)
-
-    if not room or len(room["players"]) < 2:
-        print("[WARN] start_round: プレイヤー不足")
+    players = waiting_rooms.get(password, [])
+    if not players:
         return
 
     # 親にだけカードを送る
     cards = random.sample(range(1, 10), 4)
-    leader_sid = room["players"][0]
+    leader_sid = players[0]
     emit("show_cards_parent", {"cards": cards}, room=leader_sid)
 
-    # ラウンドデータ初期化
-    room["round_data"] = {
-        "cards": cards,
-        "parent_choice": [],
-        "child_choice": []
-    }
-
+#親がカードを選んだ→
 @socketio.on("parent_choice")
 def handle_parent_choice(data):
     password = data.get("password")
-    room = rooms.get(password)
-
-    if not room or len(room["players"]) < 2:
-        print("[WARN] parent_choice: プレイヤー不足")
+    players = waiting_rooms.get(password, [])
+    #if not players:
+    #    return
+    if len(players) < 2:
+        print("受信したが、子が未参加")
         return
 
     chosen = data.get("chosen", [])
+    # 親の選んだカードを保存しておく
+    if "round_data" not in waiting_rooms:
+        waiting_rooms["round_data"] = {}
+    waiting_rooms["round_data"][password] = {"parent_choice": chosen}
+
+    print("親の選択")
+    # 子にカードを送る
     cards = data.get("cards", [])
-
-    # 親の選択を保存
-    room["round_data"]["parent_choice"] = chosen
-
-    print(f"[DEBUG] 親の選択 {chosen}")
-
-    parent_sid = room["players"][0]
-    child_sid = room["players"][1]
-
-    # 子にカードを送信
-    emit("show_cards", {"cards": cards, "parent_choice": chosen}, room=child_sid)
-    print(f"[DEBUG] 子にカード送信OK (room={password})")
+    parent_sid = players[0]
+    #emit("hide_cards", {}, room=parent_sid)
+    child_sid = players[1]
+    emit("show_cards", {"cards": cards, "parent_choice" : chosen}, room=child_sid)
+    print("カード送信OK")
 
 @socketio.on("child_choice")
 def handle_child_choice(data):
     password = data.get("password")
-    room = rooms.get(password)
-
-    if not room or len(room["players"]) < 2:
-        print("[WARN] child_choice: プレイヤー不足")
-        return
-
     chosen = data.get("chosen", [])
-    room["round_data"]["child_choice"] = chosen
+    players = waiting_rooms.get(password, [])
 
-    parent_choice = room["round_data"].get("parent_choice", [])
+    if len(players) < 2:
+        print("プレイヤー不足child_choice")
+        return 
+
+    round_data = waiting_rooms.get("round_data", {}).get(password, {})
+    parent_choice = round_data.get("parent_choice", [])
 
     # 採点：子のカード合計、ただし親が選んだカードは無効
-    parent_set = set(map(int, parent_choice))
-    score = sum(int(c) for c in chosen if int(c) not in parent_set)
+    #score = sum(int(c) for c in chosen if c not in map(int, parent_choice))
 
+    parent_set = set(map(int, parent_choice))
+
+    score = 0
+    for c in chosen:
+        c_int = int(c)
+        if c_int not in parent_set:
+            score += c_int
+
+    # 両者に結果を通知
     result = {
         "parent_choice": parent_choice,
         "child_choice": chosen,
         "score_child": score
     }
-
-    # 両者に結果を通知
-    for sid in room["players"]:
+    for sid in players:
         emit("round_result", result, room=sid)
-
+    #test
     print(f"[DEBUG] 結果送信 parent={parent_choice}, child={chosen}, score={score} (room={password})")
+
 
 @socketio.on("join_game")
 def handle_join_game(data):
