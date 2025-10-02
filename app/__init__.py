@@ -105,9 +105,9 @@ def handle_parent_choice(data):
     # 子にカードを送る
     cards = data.get("cards", [])
     parent_sid = players[0]
-    emit("hide_cards", {}, room=parent_sid)
+    #emit("hide_cards", {}, room=parent_sid)
     child_sid = players[1]
-    emit("show_cards", {"cards": cards}, room=child_sid)
+    emit("show_cards", {"cards": cards, "parent_choice" : chosen}, room=child_sid)
     print("カード送信OK")
 
 @socketio.on("child_choice")
@@ -133,7 +133,7 @@ def handle_child_choice(data):
         c_int = int(c)
         if c_int not in parent_set:
             score += c_int
-            
+
     # 両者に結果を通知
     result = {
         "parent_choice": parent_choice,
