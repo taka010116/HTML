@@ -106,6 +106,12 @@
         socket.emit("parent_choice", { password: currentPassword, cards: cardNumbers, choice: selectedCards });
         status.textContent = "子の選択待ち…";
         console.log("サーバーに送信した");
+
+        cardsDiv.querySelectorAll(".card").forEach(card => {
+        card.style.pointerEvents = "none"; // クリック無効化
+        card.style.opacity = 0.5; // 半透明にして見た目も変える
+        });
+        submitBtn.disabled = true; // 送信ボタンも無効化
       } else {
         // 子 → 自分の選択を送る
         const chosen = Array.from(document.querySelectorAll(".card.selected")).map(c => c.textContent);
