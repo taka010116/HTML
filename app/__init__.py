@@ -131,18 +131,23 @@ def handle_join_game(data):
     sid = request.sid
     join_room(password)
 
-    # 親がいなければこの人をリーダーに
+    # 親がいなければこの人を親にする
     if password not in rooms:
-        rooms[password] = {"leader": request.sid, "choices": {}}
-        emit("role", {"role": "parent"}, room=sid)
+        rooms[password] = {
+            "leader": sid,    # 親
+            "child": None,    # 子（初期化しておく）
+            "choices": {}
+        }
+        emit("role", {"role": "parent", "isLeader": True}, room=sid)
+
     else:
         room = rooms[password]
         if room["child"] is None:
             # 子として登録
             room["child"] = sid
-            emit("role", {"role": "child"}, room=sid)
+            emit("role", {"role": "child", "isLeader": False}, room=sid)
         else:
-            # 親と子が揃っていたら満員扱い
+            # すでに親と子が揃っている → 満員
             emit("error", {"message": "この部屋はすでに満員です"}, room=sid)
 
 @socketio.on("cards_generated")

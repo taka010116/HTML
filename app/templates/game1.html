@@ -42,18 +42,17 @@
     socket.emit("join_game", { password: currentPassword });
     console.log("join game ");
     socket.on("role", data => {
-      isLeader = data.isLeader;
       console.log("role 受信 : ", data);
-      console.log("isleader : ", isLeader);
-      if(isLeader){
+      isLeader = data.isLeader;   // True/False が必ず入るようになる
+      if (isLeader) {
         status.textContent = "あなたは親です。カードを2枚選んでください。";
-        // 親だけがカードを生成＆表示
         cardNumbers = generateCards();
         renderCards(cardNumbers);
       } else {
         status.textContent = "あなたは子です。親の選択待ち…";
       }
     });
+
 
     // 子にカードが送られてきた
     socket.on("show_cards", data => {
