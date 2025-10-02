@@ -20,6 +20,7 @@
 <body>
   <h1>カードゲーム</h1>
   <div id="cards"></div>
+  <div id="result"></div>
   <button id="submitBtn" disabled>選択を送信</button>
   <p id="status"></p>
 
@@ -32,6 +33,8 @@
     const cardsDiv = document.getElementById("cards");
     const submitBtn = document.getElementById("submitBtn");
     const status = document.getElementById("status");
+    const resultDiv = document.getElementById("result");
+
 
     let isLeader = false;
     let currentPassword = localStorage.getItem("password");
@@ -66,8 +69,8 @@
     });
 
     socket.on("hide_cards", () => {
-      console.log("カードを隠した");
-      document.getElementById("cards-area").style.display = "none";
+      //console.log("カードを隠した");
+      //document.getElementById("cards-area").style.display = "none";
     });
 
 
@@ -123,7 +126,6 @@
       console.log("子の得点", score_child);
       console.log("親の選択", parent_choice);
     });
-
 
     // 結果を表示
     socket.on("game_result", data => {
