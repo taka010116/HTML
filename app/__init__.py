@@ -84,7 +84,7 @@ def handle_start_round(data):
     leader_sid = players[0]
     emit("show_cards_parent", {"cards": cards}, room=leader_sid)
 
-
+#親がカードを選んだ→
 @socketio.on("parent_choice")
 def handle_parent_choice(data):
     password = data.get("password")
@@ -98,6 +98,7 @@ def handle_parent_choice(data):
         waiting_rooms["round_data"] = {}
     waiting_rooms["round_data"][password] = {"parent_choice": chosen}
 
+    print("親の選択")
     # 子にカードを送る
     cards = data.get("cards", [])
     parent_sid = players[0]

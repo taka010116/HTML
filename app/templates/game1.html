@@ -41,6 +41,7 @@
     // ゲーム参加
     socket.emit("join_game", { password: currentPassword });
     console.log("join game ");
+    
     socket.on("role", data => {
       console.log("role 受信 : ", data);
       isLeader = data.isLeader;   // True/False が必ず入るようになる
