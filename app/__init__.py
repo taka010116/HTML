@@ -33,7 +33,9 @@ def handle_join(data):
     # 部屋がなければ作成
     if password not in waiting_rooms:
         waiting_rooms[password] = []
-
+    if password not in rooms:
+        rooms[password] = {"in_progress": False, "choices": {}}
+        
     waiting_rooms[password].append(request.sid)
 
     players = waiting_rooms[password]
@@ -71,7 +73,8 @@ def handle_start(data):
         return
 
     room["in_progress"] = True  # このゲームは進行中
-    emit("game_start", {}, room=password)
+    if players:
+        emit("game_start", {}, room=password)
 
 #終わり
 @socketio.on("end_round")
@@ -85,9 +88,19 @@ def handle_end_round(data):
 @socketio.on("disconnect")
 def handle_disconnect():
     for pw, sids in list(waiting_rooms.items()):
+        # SID を除外
         waiting_rooms[pw] = [s for s in sids if s != request.sid]
+
+        # もしルームが空になったら削除＆進行中フラグクリア
         if not waiting_rooms[pw]:
             del waiting_rooms[pw]
+
+            if pw in rooms:
+                room = rooms[pw]
+                room["in_progress"] = False
+                room["choices"] = {}
+
+
 
 #game1
 @socketio.on("start_round")
