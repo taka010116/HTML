@@ -119,29 +119,22 @@ def handle_child_choice(data):
     if len(players) < 2:
         print("プレイヤー不足child_choice")
         return 
-    
-    round_data = waiting_rooms.get("round_data", {}).get(password, {})
 
+    round_data = waiting_rooms.get("round_data", {}).get(password, {})
     parent_choice = round_data.get("parent_choice", [])
-    # 採点
-    score = 0
-    for c in chosen:
-        if c not in parent_choice:
-            score += 1
+
+    # 採点：子のカード合計、ただし親が選んだカードは無効
+    score = sum(c for c in chosen if c not in parent_choice)
 
     # 両者に結果を通知
-    for sid in players:
-        emit("round_result", {
-            "parent_choice": parent_choice,
-            "child_choice": chosen,
-            "score_child": score
-        }, room=sid)
     result = {
         "parent_choice": parent_choice,
         "child_choice": chosen,
         "score_child": score
     }
-    emit("round_result", result, room=password)
+    for sid in players:
+        emit("round_result", result, room=sid)
+
     print(f"[DEBUG] 結果送信 parent={parent_choice}, child={chosen}, score={score} (room={password})")
 
 
