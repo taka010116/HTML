@@ -91,6 +91,9 @@ def handle_parent_choice(data):
     players = waiting_rooms.get(password, [])
     #if not players:
     #    return
+    if len(players) < 2:
+        print("受信したが、子が未参加")
+        return
 
     chosen = data.get("chosen", [])
     # 親の選んだカードを保存しておく
@@ -105,6 +108,7 @@ def handle_parent_choice(data):
     emit("hide_cards", {}, room=parent_sid)
     child_sid = players[1]
     emit("show_cards", {"cards": cards}, room=child_sid)
+    print("カード送信OK")
 
 @socketio.on("child_choice")
 def handle_child_choice(data):
@@ -134,6 +138,10 @@ def handle_join_game(data):
     sid = request.sid
     join_room(password)
 
+    if password not in waiting_rooms:
+        waiting_rooms[password] = []
+    waiting_rooms[password].append(sid)
+
     # 親がいなければこの人を親にする
     if password not in rooms:
         rooms[password] = {
@@ -142,7 +150,6 @@ def handle_join_game(data):
             "choices": {}
         }
         emit("role", {"role": "parent", "isLeader": True}, room=sid)
-
     else:
         room = rooms[password]
         if room["child"] is None:
