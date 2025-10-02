@@ -35,7 +35,7 @@ def handle_join(data):
         waiting_rooms[password] = []
     if password not in rooms:
         rooms[password] = {"in_progress": False, "choices": {}}
-        
+
     waiting_rooms[password].append(request.sid)
 
     players = waiting_rooms[password]
@@ -73,6 +73,7 @@ def handle_start(data):
         return
 
     room["in_progress"] = True  # このゲームは進行中
+    players = waiting_rooms.get(password, [])
     if players:
         emit("game_start", {}, room=password)
 
