@@ -231,13 +231,15 @@ def handle_join_game(data):
 
     # roleを割り当て
     if len(room_players[room_id]) == 1:
-        emit("role", {"role": "player1", "room": room_id}, room=sid)
+        emit("role", {"role": "parent", "isLeader": True}, room=sid)
     elif len(room_players[room_id]) == 2:
-        emit("role", {"role": "player2", "room": room_id}, room=sid)
+        emit("role", {"role": "child", "isLeader": False}, room=sid)
         # 両者揃ったらゲーム開始通知
-        emit("start_game", {"room": room_id}, room=room_id)
+        #emit("start_game", {"room": room_id}, room=room_id)
 
     print(f"[DEBUG] sid={sid} joined room={room_id}, players={room_players[room_id]}")
+
+
 
 @socketio.on("cards_generated")
 def handle_cards(data):
