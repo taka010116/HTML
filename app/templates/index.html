@@ -62,8 +62,8 @@
       position: absolute;
       top: 50%;       /* 画面の縦中央 */
       left: 50%;      /* 画面の横中央 */
-      transform: translate(-200%, -40%); /* 自身の幅・高さの半分だけずらす */
-      width: 100px;
+      transform: translate(-170%, -50%); /* 自身の幅・高さの半分だけずらす */
+      width: 150px;
       padding: 20px;
       margin: 100px;
       font-size: 15px;
@@ -90,6 +90,48 @@
       gap: 20px;               /* green-box と blue-box の間隔 */
     }
 
+    .red-box {
+      position: absolute;
+      top: 50%;       /* 画面の縦中央 */
+      left: 50%;      /* 画面の横中央 */
+      transform: translate(0%, 30%); /* 自身の幅・高さの半分だけずらす */
+      width: 150px;
+      padding: 10px;
+      margin: 100px;
+      font-size: 12px;
+      border: 3px solid rgb(0, 0, 0);
+      animation: moveAround 4s linear infinite;
+    }
+    @keyframes moveAround {
+      0%   { transform: translate(-50%, -50%) translate(0px, 0px); }
+      25%  { transform: translate(-50%, -50%) translate(100px, 0px); }
+      50%  { transform: translate(-50%, -50%) translate(100px, 100px); }
+      75%  { transform: translate(-50%, -50%) translate(0px, 100px); }
+      100% { transform: translate(-50%, -50%) translate(0px, 0px); }
+    }
+
+    .hello-box {
+      display: none;
+      position: absolute;
+      top: 50%;       /* 画面の縦中央 */
+      left: 50%;      /* 画面の横中央 */
+      transform: translate(0%, 30%); /* 自身の幅・高さの半分だけずらす */
+      width: 150px;
+      padding: 10px;
+      margin: 100px;
+      font-size: 13px;
+      border: 3px solid rgb(0, 0, 0);
+      animation: moveAround 2s linear infinite;
+    }
+    @keyframes moveAround {
+      0%   { transform: translate(-50%, -50%) translate(0px, 0px); }
+      25%  { transform: translate(-50%, -50%) translate(100px, 0px); }
+      50%  { transform: translate(-50%, -50%) translate(100px, 100px); }
+      75%  { transform: translate(-50%, -50%) translate(0px, 100px); }
+      100% { transform: translate(-50%, -50%) translate(0px, 0px); }
+    }
+
+
     .blue-box {
       left: 50%;
       transform: translateX(280%);
@@ -109,10 +151,8 @@
     }
   </style>
 
-
-
 <div class="main-text">
-    西暦 <span class="year">2525</span> 年
+    西暦 <span class="year">2025</span> 年
   </div>
   <div class="sub-text">
     IN THE YEAR 2525
@@ -130,7 +170,7 @@
 <p>
 <div class="container">
 <div class="green-box">
-  <a href="/me" data-desc="*こんにちは">Hello</a>
+  <a href="#" id="helloBtn" data-desc="*こんにちは">Hello</a>
   <a href="/temp" data-desc="*仮">kari</a>
   <a href="/game" data-desc="*心理ゲーム-DOUBLE MINE-">DOUBLE MINE</a>
   <a href="/blog" data-desc="*アーカイブ">Archive</a>
@@ -143,12 +183,19 @@
 </div>
 </p>
 
+<div class="red-box">
+  welcome to my site
+</div>
+
+<div class="hello-box" id="helloBox">
+  Hello
+</div>
+
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
   //const socket = io();
   const socket = io(window.location.origin);
-
   const links = document.querySelectorAll(".green-box a");
   const descBox = document.getElementById("desc-box");
 
@@ -165,6 +212,69 @@
     console.log("✅ 接続成功");
   });
 
+  document.addEventListener("DOMContentLoaded", () => {
+  const helloBtn = document.getElementById("helloBtn");
+  const helloBox = document.getElementById("helloBox");
+  
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  
+  // 初期状態は非表示
+  helloBox.style.display = "none";
+
+  helloBtn.addEventListener("click", (e) => {
+    e.preventDefault(); // ページ遷移防止
+
+    // red-box削除
+    const redBox = document.querySelector(".red-box");
+    if (redBox) redBox.remove();
+
+    // hello-boxを表示
+    helloBox.style.display = "flex";
+
+    const newBox = document.createElement("div"); // 名前を変える
+    newBox.className = "hello-box";
+    newBox.style.position = "absolute";
+    const x = Math.random() * (window.innerWidth - 160);
+    const y = Math.random() * (window.innerHeight - 60);
+    newBox.style.left = x + "px";
+    newBox.style.top = y + "px"; 
+    newBox.style.display = "flex";
+
+    // ランダム translate 30~70% で keyframes を生成
+    const tx1 = randInt(30, 70);
+    const ty1 = randInt(30, 70);
+    const tx2 = randInt(30, 70);
+    const ty2 = randInt(30, 70);
+    const tx3 = randInt(30, 70);
+    const ty3 = randInt(30, 70);
+
+    // style タグを作って keyframes を追加
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes moveAround${Date.now()} {
+        0%   { transform: translate(-50%, -50%) translate(0%, 0%); }
+        25%  { transform: translate(-50%, -50%) translate(${tx1}%, ${ty1}%); }
+        50%  { transform: translate(-50%, -50%) translate(${tx2}%, ${ty2}%); }
+        75%  { transform: translate(-50%, -50%) translate(${tx3}%, ${ty3}%); }
+        100% { transform: translate(-50%, -50%) translate(0%, 0%); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    newBox.textContent = "Hello!";
+    const duration = Math.floor(Math.random() * 9) + 1; // 1~9秒
+    newBox.style.animation = `moveAround ${duration}s linear infinite`;
+    document.body.appendChild(newBox);
+    console.log(newBox);
+
+    //document.body.appendChild(newBox);
+    console.log("Helloボタンが押されました");
+  });
+});
+
+/*
   // メッセージ受信
   socket.on("message", (data) => {
     const log = document.getElementById("log");
@@ -189,5 +299,6 @@
   document.getElementById("msg").addEventListener("keydown", (e) => {
     if(e.key === "Enter") sendMessage();
   });
+*/
 </script>
 {% endblock %}
