@@ -210,16 +210,26 @@ def generate_room_id():
 @socketio.on("join_game")
 def handle_join_game(data):
     sid = request.sid
-    room_id = data.get("room_id")
+    password = data.get("password")
+    #room_id = data.get("room_id")
 
+    if not password:
+        emit("error", {"message": "合言葉が指定されていません"}, room=sid)
+        print("パスワードなし")
+        return
     
+    if password not in rooms:
+        rooms[password] = {"leader": None, "child": None}
+        print(f"[DEBUG] 新しい部屋作成: {password}")
+
+    room = rooms[password]
     # room_id が指定されなければ新しい部屋を作る
     if not room_id:
         room_id = generate_room_id()
         rooms[room_id] = {"leader": None, "child": None}
         print(f"[DEBUG] 新しい部屋作成: {room_id}")
 
-    room = rooms[room_id]
+    #room = rooms[room_id]
     # まだ部屋が存在しない場合は初期化
     if room_id not in room_players:
         room_players[room_id] = []
@@ -228,6 +238,7 @@ def handle_join_game(data):
     if len(room_players[room_id]) >= 2:
         room_id = generate_room_id()
         room_players[room_id] = []
+        print("新しく部屋を作りました.")
 
     if sid == room.get("leader") or sid == room.get("child"):
         emit("error", {"message": "すでにこの部屋に参加しています"}, room=sid)
