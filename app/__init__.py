@@ -225,10 +225,18 @@ def handle_join_game(data):
     sid = request.sid
     join_room(password)
 
+    room = rooms.get(password)
+
+    if not room:
+        emit("error", {"message": "部屋が存在しません"}, room=sid)
+        return
+    """
     if password not in waiting_rooms:
         waiting_rooms[password] = []
     waiting_rooms[password].append(sid)
-
+    """
+    players = room["players"]
+    
     # 親がいなければこの人を親にする
     if password not in rooms:
         rooms[password] = {
