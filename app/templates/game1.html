@@ -42,11 +42,13 @@
     let cardNumbers = [];
 
     // ゲーム参加
-    socket.emit("join_game", { password: currentPassword });
+    //socket.emit("join_game", { password: currentPassword });
+    socket.emit("join_game", {});
     console.log("join game ");
-
+    
     socket.on("role", data => {
       console.log("role 受信 : ", data);
+      console.log("部屋受信 : ", data);
       isLeader = data.isLeader;   // True/False が必ず入るようになる
       if (isLeader) {
         status.textContent = "あなたは防衛側です。防衛するカードを2枚選んでください。";

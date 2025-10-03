@@ -3,12 +3,13 @@ from flask import Flask, request
 from .routes import main
 from flask_socketio import SocketIO, emit, join_room
 from config import Config
-import random
+import random, string
 
 rooms = {}
 
 socketio = SocketIO(cors_allowed_origins="*")
 
+room_players = {}
 # ロビーごとの管理: { "password": [sid1, sid2, ...] }
 waiting_rooms = {}
 
@@ -203,51 +204,40 @@ def handle_child_choice(data):
 
     print(f"[DEBUG] 結果送信 room={password}, parent={parent_choice}, child={chosen}, score={score}")
 
+def generate_room_id():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=6))
 
 @socketio.on("join_game")
 def handle_join_game(data):
-    password = data["password"]
     sid = request.sid
-    join_room(password)
+    room_id = data.get("room_id")
 
-    """
-    if password not in waiting_rooms:
-        waiting_rooms[password] = []
-    waiting_rooms[password].append(sid)
-    """
-    # 親がいなければこの人を親にする
-    if password not in rooms:
-        rooms[password] = {
-            "in_progress": False,
-            "players": [],
-            "leader": sid,       # 親
-            "child": None,       # 子
-            "round_data": {}
-        }
-        rooms[password]["players"].append(sid)
-        emit("role", {"role": "parent", "isLeader": True}, room=sid)
-        print("f[DEBUG] 新しい部屋作成: {password}, 親={sid}")
-        return
-    
-    room = rooms[password]
-    
-    if sid in room["players"]:
-        emit("error", {"message": "すでにこの部屋に参加しています"}, room=sid)
-        return
+    # room_id が指定されなければ新しい部屋を作る
+    if not room_id:
+        room_id = generate_room_id()
 
-    # 子が空いていれば子として参加
-    if room["child"] is None:
-        room["child"] = sid
-        room["players"].append(sid)
-        emit("role", {"role": "child", "isLeader": False}, room=sid)
-        print(f"[DEBUG] 子が参加 room={password}, child={sid}")
-    else:
-        # 親と子が揃っている → 満員
-        emit("error", {"message": "この部屋はすでに満員です"}, room=sid)
-        print(f"[DEBUG] 満員で拒否 room={password}, sid={sid}")
+    # まだ部屋が存在しない場合は初期化
+    if room_id not in room_players:
+        room_players[room_id] = []
 
-    # プレイヤーリスト更新
-    emit("update_players", {"players": room["players"]}, room=password)
+    # 満員なら別の部屋を新規作成
+    if len(room_players[room_id]) >= 2:
+        room_id = generate_room_id()
+        room_players[room_id] = []
+
+    # 部屋に参加
+    join_room(room_id)
+    room_players[room_id].append(sid)
+
+    # roleを割り当て
+    if len(room_players[room_id]) == 1:
+        emit("role", {"role": "player1", "room": room_id}, room=sid)
+    elif len(room_players[room_id]) == 2:
+        emit("role", {"role": "player2", "room": room_id}, room=sid)
+        # 両者揃ったらゲーム開始通知
+        emit("start_game", {"room": room_id}, room=room_id)
+
+    print(f"[DEBUG] sid={sid} joined room={room_id}, players={room_players[room_id]}")
 
 @socketio.on("cards_generated")
 def handle_cards(data):
