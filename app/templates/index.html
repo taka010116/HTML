@@ -19,7 +19,7 @@
   "@context": "https://schema.org",
   "@type": "WebSite",
   "url": "https://html-mq6q.onrender.com/",
-  "name": "通信対戦掲示板",
+  "name": "西暦2525年",
   "potentialAction": {
     "@type": "SearchAction",
     "target": "https://html-mq6q.onrender.com/?q={search_term_string}",
@@ -33,6 +33,9 @@
       font-family: "Arial", "Yu Gothic", sans-serif;
       text-align: center;
       margin-top: 100px;
+      justify-content: center; /* 横中央 */
+      align-items: center;     /* 縦中央 */
+
     }
     .main-text {
       font-size: 60px;
@@ -54,6 +57,56 @@
       margin-top: 5px;
       font-size: 16px;
     }
+
+    .green-box {
+      position: absolute;
+      top: 50%;       /* 画面の縦中央 */
+      left: 50%;      /* 画面の横中央 */
+      transform: translate(-200%, -40%); /* 自身の幅・高さの半分だけずらす */
+      width: 100px;
+      padding: 20px;
+      margin: 100px;
+      font-size: 15px;
+      border: 3px solid rgb(0, 0, 0);
+    }
+
+    .green-box a {
+      display: block;
+      margin: 10px 0;
+      text-decoration: none;
+      color: black;
+
+      transition: color 0.2s;
+    }
+
+    .green-box a:hover {
+      color: darkgreen;
+      font-weight: bold;
+    }
+    
+    .container {
+      display: flex;           /* 子要素を横並びに */
+      align-items: flex-start; /* 高さの基準を上揃え */
+      gap: 20px;               /* green-box と blue-box の間隔 */
+    }
+
+    .blue-box {
+      left: 50%;
+      transform: translateX(280%);
+      top: 20px;
+      right: 20px;
+      width: 250px;
+      height: 50px;
+      padding: 10px;
+      border: 3px solid rgb(0, 0, 0);
+      box-sizing: border-box;
+      font-size: 16px;
+      color: rgb(0, 0, 0);
+    }
+
+    .p {
+      text-align:center;
+    }
   </style>
 
 
@@ -74,7 +127,8 @@
 <button onclick="sendMessage()">送信</button>
 -->
 
-
+<p>
+<div class="container">
 <div class="green-box">
   <a href="/me" data-desc="*こんにちは">Hello</a>
   <a href="/temp" data-desc="*仮">kari</a>
@@ -82,12 +136,14 @@
   <a href="/blog" data-desc="*アーカイブ">Archive</a>
   <a href="/other" data-desc="*その他">other</a>
 
-
+</div>
 <div class="blue-box" id="desc-box">
   **info
 </div>
-
 </div>
+</p>
+
+
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
   //const socket = io();
