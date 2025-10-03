@@ -160,63 +160,48 @@ def handle_start_round(data):
 @socketio.on("parent_choice")
 def handle_parent_choice(data):
     password = data.get("password")
-    players = waiting_rooms.get(password, [])
-    #if not players:
-    #    return
-    if len(players) < 2:
-        print("受信したが、子が未参加")
+    room = rooms.get(password)
+    if not room or not room.get("child"):
+        print("親の選択を受信したが子がいない")
         return
 
     chosen = data.get("chosen", [])
-    # 親の選んだカードを保存しておく
-    if "round_data" not in waiting_rooms:
-        waiting_rooms["round_data"] = {}
-    waiting_rooms["round_data"][password] = {"parent_choice": chosen}
-
-    print("親の選択")
-    # 子にカードを送る
     cards = data.get("cards", [])
-    parent_sid = players[0]
-    #emit("hide_cards", {}, room=parent_sid)
-    child_sid = players[1]
-    emit("show_cards", {"cards": cards, "parent_choice" : chosen}, room=child_sid)
-    print("カード送信OK")
-    #te
+
+    # 部屋ごとの round_data に保存
+    room["round_data"] = {"parent_choice": chosen}
+
+    parent_sid = room["leader"]
+    child_sid = room["child"]
+
+    # 子にカードを送信
+    emit("show_cards", {"cards": cards, "parent_choice": chosen}, room=child_sid)
+    print(f"[DEBUG] 親の選択を保存 room={password}, chosen={chosen}")
 
 @socketio.on("child_choice")
 def handle_child_choice(data):
     password = data.get("password")
+    room = rooms.get(password)
+    if not room:
+        return
+
     chosen = data.get("chosen", [])
-    players = waiting_rooms.get(password, [])
-
-    if len(players) < 2:
-        print("プレイヤー不足child_choice")
-        return 
-
-    round_data = waiting_rooms.get("round_data", {}).get(password, {})
-    parent_choice = round_data.get("parent_choice", [])
-
-    # 採点：子のカード合計、ただし親が選んだカードは無効
-    #score = sum(int(c) for c in chosen if c not in map(int, parent_choice))
+    parent_choice = room.get("round_data", {}).get("parent_choice", [])
 
     parent_set = set(map(int, parent_choice))
+    score = sum(int(c) for c in chosen if int(c) not in parent_set)
 
-    score = 0
-    for c in chosen:
-        c_int = int(c)
-        if c_int not in parent_set:
-            score += c_int
-
-    # 両者に結果を通知
     result = {
         "parent_choice": parent_choice,
         "child_choice": chosen,
         "score_child": score
     }
-    for sid in players:
+
+    # 部屋内の全員に結果送信
+    for sid in room["players"]:
         emit("round_result", result, room=sid)
-    #test
-    print(f"[DEBUG] 結果送信 parent={parent_choice}, child={chosen}, score={score} (room={password})")
+
+    print(f"[DEBUG] 結果送信 room={password}, parent={parent_choice}, child={chosen}, score={score}")
 
 
 @socketio.on("join_game")
@@ -225,27 +210,44 @@ def handle_join_game(data):
     sid = request.sid
     join_room(password)
 
+    """
     if password not in waiting_rooms:
         waiting_rooms[password] = []
     waiting_rooms[password].append(sid)
-
+    """
     # 親がいなければこの人を親にする
     if password not in rooms:
         rooms[password] = {
-            "leader": sid,    # 親
-            "child": None,    # 子（初期化しておく）
-            "choices": {}
+            "in_progress": False,
+            "players": [],
+            "leader": sid,       # 親
+            "child": None,       # 子
+            "round_data": {}
         }
+        rooms[password]["players"].append(sid)
         emit("role", {"role": "parent", "isLeader": True}, room=sid)
+        print("f[DEBUG] 新しい部屋作成: {password}, 親={sid}")
+        return
+    
+    room = rooms[password]
+    
+    if sid in room["players"]:
+        emit("error", {"message": "すでにこの部屋に参加しています"}, room=sid)
+        return
+
+    # 子が空いていれば子として参加
+    if room["child"] is None:
+        room["child"] = sid
+        room["players"].append(sid)
+        emit("role", {"role": "child", "isLeader": False}, room=sid)
+        print(f"[DEBUG] 子が参加 room={password}, child={sid}")
     else:
-        room = rooms[password]
-        if room["child"] is None:
-            # 子として登録
-            room["child"] = sid
-            emit("role", {"role": "child", "isLeader": False}, room=sid)
-        else:
-            # すでに親と子が揃っている → 満員
-            emit("error", {"message": "この部屋はすでに満員です"}, room=sid)
+        # 親と子が揃っている → 満員
+        emit("error", {"message": "この部屋はすでに満員です"}, room=sid)
+        print(f"[DEBUG] 満員で拒否 room={password}, sid={sid}")
+
+    # プレイヤーリスト更新
+    emit("update_players", {"players": room["players"]}, room=password)
 
 @socketio.on("cards_generated")
 def handle_cards(data):
