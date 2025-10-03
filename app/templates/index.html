@@ -76,19 +76,17 @@
 
 
 <div class="green-box">
-  <a href="/me" data-desc="私の自己紹介ページです。">・me</a>
-  <a href="/temp" data-desc="仮のリンクです。">・仮</a>
-  <a href="/game" data-desc="作成したゲームを紹介します。">・my game</a>
-  <a href="/blog" data-desc="ブログ記事を読むことができます。">・blog</a>
-  <a href="/other" data-desc="その他のリンクです。">・</a>
-</div>
+  <a href="/me" data-desc="*こんにちは">Hello</a>
+  <a href="/temp" data-desc="*仮">kari</a>
+  <a href="/game" data-desc="*心理ゲーム-DOUBLE MINE-">DOUBLE MINE</a>
+  <a href="/blog" data-desc="*アーカイブ">Archive</a>
+  <a href="/other" data-desc="*その他">other</a>
+
 
 <div class="blue-box" id="desc-box">
-  カーソルを合わせると説明がここに表示されます。
+  **info
 </div>
 
-
-西暦2525年
 </div>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
@@ -103,7 +101,7 @@
       descBox.textContent = link.dataset.desc;
     });
     link.addEventListener("mouseout", () => {
-      descBox.textContent = "カーソルを合わせると説明がここに表示されます。";
+      descBox.textContent = "*info";
     });
   });
 
