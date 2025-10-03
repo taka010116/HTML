@@ -149,13 +149,27 @@
     .p {
       text-align:center;
     }
+
+    .doubleMine-box {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(70%, -20%); /* 自身の幅・高さの半分だけずらす */
+      width: 300px;
+      height: 400px;
+      /* padding: 10px; */
+      /* margin: 10px; */
+      font-size: 13px;
+      border: 3px solid rgb(0, 0, 0);
+    }
   </style>
 
 <div class="main-text">
     西暦 <span class="year">2025</span> 年
   </div>
   <div class="sub-text">
-    IN THE YEAR 2525
+    IN THE YEAR 2025
   </div>
   <div class="jp-sub">
     (Exordium & Terminus)<br>
@@ -172,7 +186,7 @@
 <div class="green-box">
   <a href="#" id="helloBtn" data-desc="*こんにちは">Hello</a>
   <a href="/temp" data-desc="*仮">kari</a>
-  <a href="/game" data-desc="*心理ゲーム-DOUBLE MINE-">DOUBLE MINE</a>
+  <a href="#" id="doubleBtn" data-desc="*心理ゲーム-DOUBLE MINE-">DOUBLE MINE</a>
   <a href="/blog" data-desc="*アーカイブ">Archive</a>
   <a href="/other" data-desc="*その他">other</a>
 
@@ -189,6 +203,19 @@
 
 <div class="hello-box" id="helloBox">
   Hello
+</div>
+
+<div class="doubleMine-box" id="doubleBox">
+  Double MINE <br>
+  *ルール*<br>
+  このゲームは攻撃側と守備側に分かれて行います。
+  まず四枚のカードが守備側に配られます。カードには1-9の数字がランダムに生成されています。
+  守備側は、二枚カードを選び、提出します。
+  続いて、攻撃側にカードが配られます。攻撃側は守備側が選んだカードを回避して選ぶ必要があります。
+  守っているカード以外のカードを選択すると、カードに書かれている数字の得点が入ります。
+  交互に行い、先に40PT取得したほうの勝利です。<br>
+  <br>
+  <a href="/game">Play</a>
 </div>
 
 
@@ -215,13 +242,19 @@
   document.addEventListener("DOMContentLoaded", () => {
   const helloBtn = document.getElementById("helloBtn");
   const helloBox = document.getElementById("helloBox");
+  const doubleBtn = document.getElementById("doubleBtn");
+  const doubleBox = document.getElementById("doubleBox");
   
   function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
-  
+
   // 初期状態は非表示
   helloBox.style.display = "none";
+  doubleBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    doubleBox.style.display = "flex";
+  });
 
   helloBtn.addEventListener("click", (e) => {
     e.preventDefault(); // ページ遷移防止
