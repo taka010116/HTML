@@ -74,6 +74,7 @@
     startBtn.addEventListener('click', () => {
       if(isLeader){
         console.log("開始ボタンを押しました！")
+        console.log("password : " + currentPassword);
         socket.emit("start_game", { password: currentPassword });
       }
     });

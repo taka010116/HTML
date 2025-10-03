@@ -84,6 +84,8 @@ def broadcast_players(password):
 @socketio.on("start_game")
 def handle_start(data):
     password = data.get("password")
+    print("パスワード")
+    print(password)
     room = rooms.get(password)
     if not password:
         emit("error", {"message": "パスワードが指定されていません"}, room=request.sid)
@@ -211,7 +213,10 @@ def generate_room_id():
 def handle_join_game(data):
     sid = request.sid
     room_id = data.get("room_id")  # ロビーで決められた合言葉
+    password = data.get("password")
 
+    print("join_gameで受け取ったパスワード")
+    print(password)
     # room_id がない場合のみ自動生成（通常は合言葉がある）
     if not room_id:
         room_id = generate_room_id()
