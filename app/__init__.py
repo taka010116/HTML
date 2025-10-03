@@ -212,10 +212,14 @@ def handle_join_game(data):
     sid = request.sid
     room_id = data.get("room_id")
 
+    
     # room_id が指定されなければ新しい部屋を作る
     if not room_id:
         room_id = generate_room_id()
+        rooms[room_id] = {"leader": None, "child": None}
+        print(f"[DEBUG] 新しい部屋作成: {room_id}")
 
+    room = rooms[room_id]
     # まだ部屋が存在しない場合は初期化
     if room_id not in room_players:
         room_players[room_id] = []
@@ -225,21 +229,30 @@ def handle_join_game(data):
         room_id = generate_room_id()
         room_players[room_id] = []
 
+    if sid == room.get("leader") or sid == room.get("child"):
+        emit("error", {"message": "すでにこの部屋に参加しています"}, room=sid)
+        return
+    
     # 部屋に参加
-    join_room(room_id)
-    room_players[room_id].append(sid)
-
-    # roleを割り当て
-    if len(room_players[room_id]) == 1:
+    if room["leader"] is None:
+        room["leader"] = sid
+        join_room(room_id)
         emit("role", {"role": "parent", "isLeader": True}, room=sid)
-    elif len(room_players[room_id]) == 2:
+        print(f"[DEBUG] 親が参加: room={room_id}, leader={sid}")
+
+    # 子の枠が空いていれば子
+    elif room["child"] is None:
+        room["child"] = sid
+        join_room(room_id)
         emit("role", {"role": "child", "isLeader": False}, room=sid)
-        # 両者揃ったらゲーム開始通知
-        #emit("start_game", {"room": room_id}, room=room_id)
+        print(f"[DEBUG] 子が参加: room={room_id}, child={sid}")
 
-    print(f"[DEBUG] sid={sid} joined room={room_id}, players={room_players[room_id]}")
+        # 親子が揃ったら開始通知
+        emit("start_game", {"room": room_id}, room=room_id)
 
-
+    else:
+        emit("error", {"message": "この部屋は満員です"}, room=sid)
+        print(f"[DEBUG] 満員で拒否: room={room_id}, sid={sid}")
 
 @socketio.on("cards_generated")
 def handle_cards(data):
