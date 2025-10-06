@@ -180,22 +180,20 @@ def generate_room_id():
 @socketio.on("join_game")
 def handle_join_game(data):
     sid = request.sid
-    room_id = data.get("room_id")  # ロビーで決められた合言葉
-    password = data.get("password")
+    password = data.get("password")  # ロビーで入力された合言葉
 
-    print("join_gameで受け取ったパスワード")
-    print(password)
-    # room_id がない場合のみ自動生成（通常は合言葉がある）
-    if not room_id:
-        room_id = generate_room_id()
-        print(f"[DEBUG] room_id自動生成: {room_id}")
+    if not password:
+        emit("error", {"message": "パスワードが必要です"}, room=sid)
+        return
+
+    print("join_gameで受け取ったパスワード:", password)
 
     # 部屋がなければ作成
-    if room_id not in rooms:
-        rooms[room_id] = {"leader": None, "child": None}
-        print(f"[DEBUG] 新しい部屋作成: {room_id}")
+    if password not in rooms:
+        rooms[password] = {"leader": None, "child": None}
+        print(f"[DEBUG] 新しい部屋作成: {password}")
 
-    room = rooms[room_id]
+    room = rooms[password]
 
     # すでに親か子に参加済みならエラー
     if sid in (room.get("leader"), room.get("child")):
@@ -205,27 +203,21 @@ def handle_join_game(data):
     # 親が空いていれば防衛
     if room["leader"] is None:
         room["leader"] = sid
-        join_room(room_id)
-        emit("role", {"role": "parent", "isLeader": True, "room_id": room_id}, room=sid)
-        print(f"[DEBUG] 親(防衛)が参加: room={room_id}, leader={sid}")
+        join_room(password)
+        emit("role", {"role": "parent", "isLeader": True, "room_id": password}, room=sid)
+        print(f"[DEBUG] 親(防衛)が参加: room={password}, leader={sid}")
 
     # 子が空いていれば攻撃
     elif room["child"] is None:
         room["child"] = sid
-        join_room(room_id)
-        emit("role", {"role": "child", "isLeader": False, "room_id": room_id}, room=sid)
-        print(f"[DEBUG] 子(攻撃)が参加: room={room_id}, child={sid}")
-
-        # 親子揃ったらゲーム開始通知
-        #emit("start_game", {"room": room_id}, room=room_id)
+        join_room(password)
+        emit("role", {"role": "child", "isLeader": False, "room_id": password}, room=sid)
+        print(f"[DEBUG] 子(攻撃)が参加: room={password}, child={sid}")
 
     else:
         # 親子揃っている → 満員
         emit("error", {"message": "この部屋は満員です"}, room=sid)
-        print(f"[DEBUG] 満員で拒否: room={room_id}, sid={sid}")
-
-    # クライアントにroom_idを返して、次回参加用に保持させる
-    #emit("room_assigned", {"room_id": room_id}, room=sid)
+        print(f"[DEBUG] 満員で拒否: room={password}, sid={sid}")
 
 
 @socketio.on("cards_generated")
