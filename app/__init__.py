@@ -60,21 +60,6 @@ def handle_join(data):
     # プレイヤーリスト更新
     emit("update_players", {"players": players}, room=password)
 
-"""
-    if len(players) == 1:
-        emit("login_result", {"status": "waiting", "isLeader": True, "name": f"Player{len(players)}"}, room=request.sid)
-    else:
-        for i, sid in enumerate(players):
-            is_leader = (sid == leader_sid)
-            emit("login_result", {
-                "status": "ready",
-                "isLeader": is_leader,
-                "name": f"Player{i+1}"
-            }, room=sid)
-        broadcast_players(password)
-
-"""
-
 def broadcast_players(password):
     players = rooms[password]["players"]
     player_names = [f"Player{i+1}" for i in range(len(players))]
@@ -117,23 +102,6 @@ def handle_end_round(data):
     if room:
         room["in_progress"] = False
         room["choices"] = {}
-
-"""
-@socketio.on("disconnect")
-def handle_disconnect():
-    for pw, sids in list(waiting_rooms.items()):
-        # SID を除外
-        waiting_rooms[pw] = [s for s in sids if s != request.sid]
-
-        # もしルームが空になったら削除＆進行中フラグクリア
-        if not waiting_rooms[pw]:
-            del waiting_rooms[pw]
-
-            if pw in rooms:
-                room = rooms[pw]
-                room["in_progress"] = False
-                room["choices"] = {}
-"""
 
 @socketio.on("disconnect")
 def handle_disconnect():

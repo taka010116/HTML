@@ -35,15 +35,16 @@
     const status = document.getElementById("status");
     const resultDiv = document.getElementById("result");
 
-
     let isLeader = false;
     let currentPassword = localStorage.getItem("password");
     let selectedCards = [];
     let cardNumbers = [];
+    //let currentPassword = localStorage.getItem("password");
 
     // ゲーム参加
+    console.log("パスワード : " , currentPassword);
     //socket.emit("join_game", { password: currentPassword });
-    socket.emit("join_game", {});
+    socket.emit("join_game", { });
     console.log("join game ");
     
     socket.on("role", data => {

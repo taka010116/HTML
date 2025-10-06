@@ -73,9 +73,12 @@
 
     startBtn.addEventListener('click', () => {
       if(isLeader){
+        currentPassword = passwordInput.value;
         console.log("開始ボタンを押しました！")
         console.log("password : " + currentPassword);
         socket.emit("start_game", { password: currentPassword });
+        localStorage.setItem("gamePassword", currentPassword);
+        socket.emit("join", { password: currentPassword });
       }
     });
 
