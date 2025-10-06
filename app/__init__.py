@@ -168,9 +168,21 @@ def handle_child_choice(data):
         "score_child": score
     }
 
+    players = room.get("players", [])
     # 部屋内の全員に結果送信
-    for sid in room["players"]:
-        emit("round_result", result, room=sid)
+
+    if not players:
+        print(f"[DEBUG] playersが空です: room={password}")
+        # 安全のため leader と child だけに送信
+        for sid in [room.get("leader"), room.get("child")]:
+            if sid:
+                emit("round_result", result, room=sid)
+    else:
+        for sid in players:
+            emit("round_result", result, room=sid)
+
+    #for sid in room["players"]:
+    #    emit("round_result", result, room=sid)
 
     print(f"[DEBUG] 結果送信 room={password}, parent={parent_choice}, child={chosen}, score={score}")
 
