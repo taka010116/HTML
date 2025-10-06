@@ -18,9 +18,17 @@ def game():
 def game1():
     return render_template("game1.html")
 
+@main.route("/register")
+def register():
+    return render_template("register.html")
+
 @main.route("/login")
 def login():
     return render_template("login.html")
+
+@main.route("/account")
+def account():
+    return render_template("account.html")
 
 
 """
