@@ -132,23 +132,30 @@ def handle_start_round(data):
 def handle_parent_choice(data):
     password = data.get("password")
     room = rooms.get(password)
-    if not room or not room.get("child"):
-        print("親の選択を受信したが子がいない")
+    if not room:
+        print(f"[DEBUG] roomが存在しません: {password}")
         return
 
     chosen = data.get("chosen", [])
     cards = data.get("cards", [])
 
+    # leader と child を room に保存（初回のみ）
+    if "leader" not in room:
+        room["leader"] = room["players"][0]
+    if "child" not in room and len(room["players"]) > 1:
+        room["child"] = room["players"][1]
+
     # 部屋ごとの round_data に保存
     room["round_data"] = {"parent_choice": chosen}
 
-    parent_sid = room["leader"]
-    child_sid = room["child"]
+    parent_sid = room.get("leader")
+    child_sid = room.get("child")
+
+    print(f"[DEBUG] 親の選択: {chosen}, room={password}, leader={parent_sid}, child={child_sid}")
 
     # 子にカードを送信
     emit("show_cards", {"cards": cards, "parent_choice": chosen}, room=child_sid)
-    print(f"[DEBUG] 親の選択を保存 room={password}, chosen={chosen}")
-
+    
 @socketio.on("child_choice")
 def handle_child_choice(data):
     password = data.get("password")
