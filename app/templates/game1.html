@@ -44,7 +44,7 @@
     // ゲーム参加
     console.log("パスワード : " , currentPassword);
     //socket.emit("join_game", { password: currentPassword });
-    socket.emit("join_game", { currentPassword });
+    socket.emit("join_game", { password: currentPassword });
     console.log("join game ");
     
     socket.on("role", data => {

@@ -181,13 +181,12 @@ def generate_room_id():
 def handle_join_game(data):
     sid = request.sid
     password = data.get("password")  # ロビーで入力された合言葉
+    print("join_gameで受け取ったパスワード:", password)
 
     if not password:
         emit("error", {"message": "パスワードが必要です"}, room=sid)
         return
-
-    print("join_gameで受け取ったパスワード:", password)
-
+    
     # 部屋がなければ作成
     if password not in rooms:
         rooms[password] = {"leader": None, "child": None}
