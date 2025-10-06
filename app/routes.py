@@ -18,6 +18,10 @@ def game():
 def game1():
     return render_template("game1.html")
 
+@main.route("/login")
+def login():
+    return render_template("login.html")
+
 
 """
 @socketio.on("message")

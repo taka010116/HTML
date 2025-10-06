@@ -194,7 +194,7 @@
   <a href="#" id="helloBtn" data-desc="*こんにちは">Hello</a>
   <a href="/temp" data-desc="*仮">kari</a>
   <a href="#" id="doubleBtn" data-desc="*心理ゲーム-DOUBLE MINE-">DOUBLE MINE</a>
-  <a href="/blog" data-desc="*アーカイブ">Archive</a>
+  <a href="/login" data-desc="*アーカイブ">Archive</a>
   <a href="/other" data-desc="*その他">other</a>
 
 </div>
@@ -314,31 +314,5 @@
   });
 });
 
-/*
-  // メッセージ受信
-  socket.on("message", (data) => {
-    const log = document.getElementById("log");
-    const p = document.createElement("p");
-    p.textContent = data.msg;
-    log.appendChild(p);
-    // 常に最新のメッセージが見えるようにスクロール
-    log.scrollTop = log.scrollHeight;
-    console.log(log);
-    console.log(p);
-  });
-
-  // メッセージ送信
-  function sendMessage() {
-    const msg = document.getElementById("msg").value;
-    if(msg.trim() === "") return;
-    socket.emit("message", msg);
-    document.getElementById("msg").value = "";
-  }
-
-  // Enterキーでも送信
-  document.getElementById("msg").addEventListener("keydown", (e) => {
-    if(e.key === "Enter") sendMessage();
-  });
-*/
 </script>
 {% endblock %}
