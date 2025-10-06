@@ -13,6 +13,7 @@
   <h1>ロビー</h1>
 
   <div id="login">
+    <input type="text" id="username" placeholder="ユーザー名を入力（任意）">
     <input type="text" id="password" placeholder="あいことばを入力">
     <button id="enterBtn">ロビーに入る</button>
     <p id="loginMsg"></p>
@@ -30,6 +31,7 @@
   <script>
     const loginDiv = document.getElementById('login');
     const lobbyDiv = document.getElementById('lobby');
+    const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const enterBtn = document.getElementById('enterBtn');
     const loginMsg = document.getElementById('loginMsg');
@@ -38,12 +40,18 @@
 
     const socket = io();
     let currentPassword = "";
+    let currentUsername = "";
     let isLeader = false;
 
     loginDiv.style.display = 'block';
 
+    function generateRandomUsername() {
+      return "Player" + Math.floor(Math.random() * 1000);
+    }
+
     enterBtn.addEventListener('click', () => {
       currentPassword = passwordInput.value;
+      currentUsername = usernameInput.value || generateRandomUsername();
       console.log("開始ボタンを押しました。");
       socket.emit("join", { password: currentPassword });
     });
