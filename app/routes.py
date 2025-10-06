@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, url_for, Flask, jsonify, render_template, flash, render_template_string, request,g, session
 #from flask_socketio import emit
 #from app import socketio
-
+app = Flask(__name__)
 #main = Blueprint('main', __name__)
 main = Blueprint("main", __name__, template_folder="templates")
 
@@ -30,6 +30,12 @@ def login():
 def account():
     return render_template("account.html")
 
+@main.route("/archive")
+def archive():
+    return render_template("archive.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)
 
 """
 @socketio.on("message")
