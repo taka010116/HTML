@@ -89,6 +89,11 @@
       status.textContent = "カードを2枚選んでください。";
     });
 
+    socket.on("wait_for_parent", () => {
+      cardsDiv.innerHTML = "";
+      status.textContent = "防衛側の選択待ち…";
+    });
+
     socket.on("hide_cards", () => {
       //console.log("カードを隠した");
       //document.getElementById("cards-area").style.display = "none";
@@ -123,6 +128,7 @@
     }
 
     // 選択送信ボタン
+    /*
     submitBtn.addEventListener("click", () => {
       if(isLeader){
         // 親 → 自分の選択とカードをサーバーに送る
@@ -144,7 +150,8 @@
       }
       submitBtn.disabled = true;
     });
-
+    */
+    /*
     socket.on("round_result", (data) => {
       const { parent_choice, child_choice, score_child } = data;
       resultDiv.innerHTML = `
@@ -175,6 +182,48 @@
 
       console.log("攻撃側の得点", score_child);
       console.log("防衛側の選択", parent_choice);
+    });
+    */
+
+    //
+    socket.on("round_result", (data) => {
+      const { parent_choice, child_choice, score_child } = data;
+      resultDiv.innerHTML = `
+        <p>防衛側の選んだカード: ${parent_choice.join(", ")}</p>
+        <p>攻撃側の選んだカード: ${child_choice.join(", ")}</p>
+        <p>攻撃側の得点: ${score_child}</p>
+      `;
+
+      console.log("攻撃側の得点", score_child);
+      console.log("防衛側の選択", parent_choice);
+
+
+    if (isLeader) {
+        opponentScore += score_child;
+      } else {
+        myScore += score_child;
+      }
+
+      updateScoreboard();
+
+      // ✅ 親だけ「次へ」ボタン表示
+      if (isLeader) {
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "次のラウンドへ ▶";
+        nextBtn.id = "nextBtn";
+        document.body.appendChild(nextBtn);
+
+        nextBtn.addEventListener("click", () => {
+          socket.emit("start_round", { password: currentPassword });
+          nextBtn.remove();
+          resultDiv.innerHTML = "";
+          round++;
+          isLeader = !isLeader; // 役割交代
+          updateScoreboard();
+        });
+      } else {
+        status.textContent = "防衛側が次のラウンドを開始します…";
+      }
     });
 
       // ラウンド終了後に呼ばれる
