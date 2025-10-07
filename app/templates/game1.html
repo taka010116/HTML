@@ -39,6 +39,23 @@
     let currentPassword = localStorage.getItem("gamePassword");
     let selectedCards = [];
     let cardNumbers = [];
+    let round = 1;
+    let myScore = 0;
+    let opponenScore = 0;
+
+    const scoreDiv = document.createElement("div");
+    scoreDiv.id = "scoreDiv";
+    scoreDiv.style.margin = "10px";
+    document.body.appendChild(scoreDiv);
+
+    function updateScoreboard() {
+      scoreDiv.innerHTML = `
+        <h3>ラウンド ${round}</h3>
+        <p>あなたのスコア: ${myScore}</p>
+        <p>相手のスコア: ${opponentScore}</p>
+        <p>現在の役割: <strong>${isLeader ? "親" : "子"}</strong></p>
+      `;
+    }
     //let currentPassword = localStorage.getItem("password");
 
     // ゲーム参加
@@ -80,6 +97,7 @@
     // 親・子共通: 選択
     function renderCards(numbers){
       cardsDiv.innerHTML = "";
+      selectedCards = [];
       numbers.forEach(num => {
         const div = document.createElement("div");
         div.classList.add("card");
@@ -87,6 +105,7 @@
         div.addEventListener("click", () => toggleSelect(div, num));
         cardsDiv.appendChild(div);
       });
+      submitBtn.disabled = true;
     }
 
     function toggleSelect(cardEl, num){
@@ -132,9 +151,69 @@
         <p>攻撃側の選んだカード: ${child_choice.join(", ")}</p>
         <p>攻撃側の得点: ${score_child}</p>
       `;
+
+      // スコア更新
+      if (isLeader) {
+        opponentScore += score_child;
+      } else {
+        myScore += score_child;
+      }
+
+      updateScoreboard();
+
+      // 次へボタンを追加
+      const nextBtn = document.createElement("button");
+      nextBtn.textContent = "次のラウンドへ ▶";
+      nextBtn.id = "nextBtn";
+      document.body.appendChild(nextBtn);
+
+      nextBtn.addEventListener("click", () => {
+        nextBtn.remove();
+        nextRound();
+      });
+
       console.log("攻撃側の得点", score_child);
       console.log("防衛側の選択", parent_choice);
     });
+
+      // ラウンド終了後に呼ばれる
+    function nextRound() {
+      round++;
+      isLeader = !isLeader; // 役割交代
+      electedCards = [];
+      resultDiv.innerHTML = "";
+
+      if (round > 10) {
+        showFinalResult();
+        return;
+      }
+
+      // カード再生成
+      cardNumbers = generateCards();
+      renderCards(cardNumbers);
+
+      // 状態更新
+      if (isLeader) {
+        status.textContent = `第${round}ラウンド：あなたは防衛側です。2枚選んでください。`;
+      } else {
+        status.textContent = `第${round}ラウンド：あなたは攻撃側です。防衛側の選択待ち…`;
+        socket.emit("request_cards", { password: currentPassword }); // 攻撃側が新カード要求
+      }
+
+      updateScoreboard();
+    }
+
+    // 10ラウンド終了後
+    function showFinalResult() {
+      status.textContent = "🎉 ゲーム終了 🎉";
+      resultDiv.innerHTML = `
+        <h2>最終結果</h2>
+        <p>あなたのスコア: ${myScore}</p>
+        <p>相手のスコア: ${opponentScore}</p>
+        <p>${myScore > opponentScore ? "🏆 あなたの勝利！" : (myScore === opponentScore ? "引き分け！" : "相手の勝利！")}</p>
+      `;
+    }
+
 
     // 結果を表示
     socket.on("game_result", data => {

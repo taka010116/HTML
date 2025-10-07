@@ -153,7 +153,7 @@ def handle_parent_choice(data):
     room["round_data"]["parent_choice"] = chosen
     print("親の選択parent")
     print(room["round_data"]["parent_choice"])
-    
+
     parent_sid = room.get("leader")
     child_sid = room.get("child")
 
@@ -270,6 +270,36 @@ def handle_choice(data):
         score = sum(c for c in child if c not in parent)
         emit("game_result", {"parent": parent, "child": child, "score": score}, room=password)
         room["choices"] = {}
+
+@socketio.on("request_cards")
+def handle_request_cards(data):
+    password = data.get("password")
+    if not password or password not in rooms:
+        print("[ERROR] 無効なパスワードまたは部屋が存在しません")
+        return
+
+    room = rooms[password]
+    print(f"[DEBUG] カード再生成リクエスト: room={password}")
+
+    # 新しいカードを生成（1〜9の重複なしランダム4枚）
+    import random
+    new_cards = random.sample(range(1, 10), 4)
+
+    # 親（leader）に新カードを送信
+    leader_sid = room.get("leader")
+    if leader_sid:
+        emit("show_cards", {"cards": new_cards}, room=leader_sid)
+        print(f"[DEBUG] 親({leader_sid}) に新しいカード送信: {new_cards}")
+
+    # 子（child）には「防衛側の選択待ち」と表示させるため、通知だけ送る
+    child_sid = room.get("child")
+    if child_sid:
+        emit("hide_cards", {}, room=child_sid)
+        print(f"[DEBUG] 子({child_sid}) に防衛側待機を通知")
+
+    # ログ用
+    print(f"[DEBUG] 新カード: {new_cards}")
+
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000)
