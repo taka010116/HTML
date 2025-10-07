@@ -145,9 +145,15 @@ def handle_parent_choice(data):
     if "child" not in room and len(room["players"]) > 1:
         room["child"] = room["players"][1]
 
-    # 部屋ごとの round_data に保存
-    room["round_data"] = {"parent_choice": chosen}
+    if "round_data" not in room:
+        room["round_data"] = {}
 
+    # 部屋ごとの round_data に保存
+    #room["round_data"] = {"parent_choice": chosen}
+    room["round_data"]["parent_choice"] = chosen
+    print("親の選択parent")
+    print(room["round_data"]["parent_choice"])
+    
     parent_sid = room.get("leader")
     child_sid = room.get("child")
 
@@ -175,6 +181,9 @@ def handle_child_choice(data):
         "score_child": score
     }
 
+    print("親の選択")
+    print(parent_choice)
+
     players = room.get("players", [])
     # 部屋内の全員に結果送信
 
@@ -192,6 +201,7 @@ def handle_child_choice(data):
     #    emit("round_result", result, room=sid)
 
     print(f"[DEBUG] 結果送信 room={password}, parent={parent_choice}, child={chosen}, score={score}")
+
 
 def generate_room_id():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=6))
