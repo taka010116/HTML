@@ -106,7 +106,7 @@
     submitBtn.addEventListener("click", () => {
       if(isLeader){
         // 親 → 自分の選択とカードをサーバーに送る
-        socket.emit("parent_choice", { password: currentPassword, cards: cardNumbers, choice: selectedCards });
+        socket.emit("parent_choice", { password: currentPassword, cards: cardNumbers, chosen: selectedCards });
         status.textContent = "子の選択待ち…";
         console.log("サーバーに送信した");
 
