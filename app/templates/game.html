@@ -95,7 +95,7 @@
 
     socket.on("game_start", () => {
       const password = encodeURIComponent(currentPassword);
-      window.location.href = "/game1?password=${password}";
+      window.location.href = `/game1?password=${password}`;
     });
   </script>
 </body>
