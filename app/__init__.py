@@ -304,6 +304,8 @@ def handle_request_cards(data):
 @socketio.on("next_round")
 def handle_next_round(data):
     password = data["password"]
+    sid = request.sid
+    room = rooms.get(password)
 
     if password not in rooms:
         print("❌ ルームが見つかりません:", password)
@@ -313,8 +315,8 @@ def handle_next_round(data):
     print("🎮 現在のルーム情報:", room)
 
     # 親子が存在するか確認
-    if "parent" not in room or "child" not in room:
-        print("❌ parent / child が設定されていません")
+    if not room.get("leader") or not room.get("child"):
+        print(f"❌ parent / child が設定されていません: room={password}")
         return
 
     # 親子を入れ替える
@@ -325,6 +327,10 @@ def handle_next_round(data):
     # ラウンド数を進める
     room["round"] = room.get("round", 1) + 1
 
+    print(f"[ROUND] 次のラウンド開始: {password}, Round={room['round']}")
+    print(f"👑 新しい親: {room['leader']} / 🎯 新しい子: {room['child']}")
+
+    
     # 親と子に新しい役割を通知
     emit("role", {"role": "parent", "isLeader": True, "room_id": password}, room=room["parent"])
     emit("role", {"role": "child", "isLeader": False, "room_id": password}, room=room["child"])
