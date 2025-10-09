@@ -197,7 +197,7 @@
       console.log("攻撃側の得点", score_child);
       console.log("防衛側の選択", parent_choice);
 
-      let score_parent = 0;
+      let score_parent = 0; 
       if( score_child === 0){
         score_parent = 10;
         resultDiv.innerHTML = `
@@ -214,6 +214,36 @@
       `;
       }
 
+      const allCards = parent_choice.map((num, i) => {
+        const div = document.createElement("div");
+        div.classList.add("card");
+        div.style.position = "relative";
+        div.textContent = num;
+
+        // 防御側サンダー画像（右下）
+        const thunderImg = document.createElement("img");
+        thunderImg.src = "/static/images/thunder.png";
+        thunderImg.style.position = "absolute";
+        thunderImg.style.width = "50%";
+        thunderImg.style.height = "auto";
+        thunderImg.style.bottom = "5%";
+        thunderImg.style.right = "5%";
+        div.appendChild(thunderImg);
+
+        // 攻撃側人間画像（左上）
+        const humanImg = document.createElement("img");
+        humanImg.src = "/static/images/human.png";
+        humanImg.style.position = "absolute";
+        humanImg.style.width = "50%";
+        humanImg.style.height = "auto";
+        humanImg.style.top = "5%";
+        humanImg.style.left = "5%";
+        div.appendChild(humanImg);
+
+        return div;
+      });
+      allCards.forEach(card => resultDiv.appendChild(card));
+      
       if (isLeader) {
         opponentScore += score_child;
         myScore += score_parent;
