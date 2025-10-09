@@ -180,8 +180,8 @@
     /* ボックス内にGIFを埋め込む共通クラス */
   .gif-box {
     position: relative;
-    width: 120px;
-    height: 120px;              /* 高さは自由に調整可能 */
+    width: 200px;
+    height: 200px;              /* 高さは自由に調整可能 */
     overflow: hidden;           /* はみ出しを非表示 */
     border-radius: 8px;         /* 角を丸く */
     margin-bottom: 10px;        /* 下のテキストとの余白 */
@@ -191,8 +191,8 @@
 
   .gif-box2 {
     position: relative;
-    width: 150px;
-    height: 150px;              /* 高さは自由に調整可能 */
+    width: 250px;
+    height: 250px;              /* 高さは自由に調整可能 */
     overflow: hidden;           /* はみ出しを非表示 */
     border-radius: 8px;         /* 角を丸く */
     margin-bottom: 10px;        /* 下のテキストとの余白 */
@@ -207,7 +207,7 @@
     transform: translate(100%, -250%);
   }
   .posSky {
-    transform: translate(200%, -100%);
+    transform: translate(150%, -100%);
   }
 
   .rotate-move {
@@ -215,7 +215,7 @@
     width: 150px;
     height: 150px;
     margin: 50px auto;       /* 中央に配置 */
-    transform: translate(400px, -300px); /* X/Y方向に微調整 */
+    transform: translate(400px, -400px); /* X/Y方向に微調整 */
     perspective: 800px;      /* 3D効果用 */
   }
 
@@ -227,7 +227,7 @@
     border-radius: 10px; 
     overflow: hidden;
     /* アニメーション */
-    animation: rotateY 5s linear infinite; /* 5秒で1回転 */
+    /* animation: rotateY 5s linear infinite; */ /* 5秒で1回転 */
   }
 
   .rotate-box img {
