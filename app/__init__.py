@@ -332,7 +332,7 @@ def handle_next_round(data):
 
 
     # 親と子に新しい役割を通知
-    emit("role", {"role": "parent", "isLeader": True, "room_id": password}, room=room["parent"])
+    emit("role", {"role": "parent", "isLeader": True, "room_id": password}, room=room["leader"])
     emit("role", {"role": "child", "isLeader": False, "room_id": password}, room=room["child"])
 
     # 全員に次ラウンド開始を通知
