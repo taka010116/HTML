@@ -217,31 +217,44 @@
       round_cards.forEach(num => {
         const div = document.createElement("div");
         div.classList.add("card");
-        div.style.position = "relative"; // overlayの基準
+        div.style.position = "relative";
+        div.style.width = "80px";  // カード幅
+        div.style.height = "120px"; // カード高さ
+        div.style.display = "flex";
+        div.style.alignItems = "center";
+        div.style.justifyContent = "center";
+        div.style.fontSize = "24px";
+        div.style.fontWeight = "bold";
         div.textContent = num;
 
-        // オーバーレイ画像作成（初期は非表示）
-        const img = document.createElement("img");
-          img.style.position = "absolute";
-        img.style.width = "50%";
-        img.style.height = "auto";
-        img.style.opacity = "0.7";
-        img.style.pointerEvents = "none";
-
-        // 配置位置
         if(parent_choice.includes(num)) {
+          const img = document.createElement("img");
           img.src = "/static/images/thunder.png";
+          img.style.position = "absolute";
+          img.style.width = "50%";
+          img.style.height = "auto";
+          img.style.opacity = "0.7";
           img.style.bottom = "5%";
           img.style.right = "5%";
-        }
-        if(child_choice.includes(num)) {
-          img.src = "/static/images/human.png";
-          img.style.top = "5%";
-          img.style.left = "5%";
+          img.style.pointerEvents = "none";
+          div.appendChild(img);
         }
 
-        div.appendChild(img);
-        resultDiv.appendChild(div);
+        // 攻撃側オーバーレイ
+        if(child_choice.includes(num)) {
+          const img = document.createElement("img");
+          img.src = "/static/images/human.png";
+          img.style.position = "absolute";
+          img.style.width = "50%";
+          img.style.height = "auto";
+          img.style.opacity = "0.7";
+          img.style.top = "5%";
+          img.style.left = "5%";
+          img.style.pointerEvents = "none";
+          div.appendChild(img);
+        }
+
+        cardsContainer.appendChild(div);
       });
 
       if (isLeader) {
