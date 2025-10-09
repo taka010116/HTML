@@ -320,7 +320,7 @@ def handle_next_round(data):
         return
 
     # 親子を入れ替える
-    old_parent = room["laeder"]
+    old_parent = room["leader"]
     old_child = room["child"]
     room["leader"], room["child"] = old_child, old_parent
 
