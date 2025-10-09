@@ -84,7 +84,7 @@
 
     startBtn.addEventListener('click', () => {
       if(isLeader){
-        currentPassword = passwordInput.value;
+        currentPassword = passwordInput.value.trim();
         console.log("開始ボタンを押しました！")
         console.log("password : " + currentPassword);
         socket.emit("start_game", { password: currentPassword });
@@ -94,7 +94,8 @@
     });
 
     socket.on("game_start", () => {
-      window.location.href = "/game1";
+      const password = encodeURIComponent(currentPassword);
+      window.location.href = "/game1?password=${password}";
     });
   </script>
 </body>

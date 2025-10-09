@@ -45,6 +45,14 @@
     let myScore = 0;
     //直した。
     let opponentScore = 0;
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.has("password")) {
+      currentPassword = params.get("password");
+      localStorage.setItem("gamePassword", currentPassword);
+    }
+    console.log("使用するパスワード:", currentPassword);
+    
 
     const scoreDiv = document.createElement("div");
     scoreDiv.id = "scoreDiv";
