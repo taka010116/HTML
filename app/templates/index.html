@@ -191,29 +191,60 @@
 
   .gif-box2 {
     position: relative;
-    width: 100%;
+    width: 10%;
     height: 120px;              /* 高さは自由に調整可能 */
     overflow: hidden;           /* はみ出しを非表示 */
     border-radius: 8px;         /* 角を丸く */
     margin-bottom: 10px;        /* 下のテキストとの余白 */
     border: 2px solid #000;     /* 枠線 */
-    transform: translate(-150%, -70%);
   }
 
-  /* GIF画像そのものを綺麗に表示 */
-  .gif-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;          /* 枠にフィットさせてトリミング */
-    border-radius: 8px;
-      display: block;
+  .pos1 {
+    transform: translate(-200%, -100%);
   }
-  .gif-box2 img {
+
+  .pos2 {
+    transform: translate(100%, -250%);
+  }
+  .posSky {
+    transform: translate(200%, -100%);
+  }
+
+  .rotate-move {
+    position: relative;       /* 位置調整用 */
+    width: 150px;
+    height: 150px;
+    margin: 50px auto;       /* 中央に配置 */
+    transform: translate(400px, -300px); /* X/Y方向に微調整 */
+    perspective: 800px;      /* 3D効果用 */
+  }
+
+  .rotate-box {
+    width: 150px;
+    height: 150px; 
+    margin: 50px auto; 
+    border: 2px solid #000; 
+    border-radius: 10px; 
+    overflow: hidden;
+    /* アニメーション */
+    animation: rotateY 5s linear infinite; /* 5秒で1回転 */
+  }
+
+  .rotate-box img {
     width: 100%;
     height: 100%;
-    object-fit: cover;          /* 枠にフィットさせてトリミング */
-    border-radius: 8px;
-      display: block;
+    object-fit: cover;
+    display: block;
+    }
+
+  /* Z軸回転アニメーション */
+  @keyframes rotateY {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(360deg);
+    }
   }
   </style>
 
@@ -229,16 +260,6 @@
   </div>
 <p>
 
-<div class="green-box">
-  <div class="gif-box">
-    <img src="/static/images/america.gif" alt="サンプルGIF">
-  </div>
-</div>
-<div class="green-box2">
-  <div class="gif-box2">
-    <img src="/static/images/america2.gif" alt="サンプルGIF2">
-  </div>
-</div>
 <div class="container">
 <div class="green-box">
   <a href="#" id="helloBtn" data-desc="*こんにちは">Hello</a>
@@ -260,6 +281,21 @@
 
 <div class="hello-box" id="helloBox">
   Hello
+</div>
+<div class="rotate-move">
+<div class="rotate-box">
+  <img src="/static/images/sky.gif" alt="GIF">
+</div>
+</div>
+<div class="green-box">
+  <div class="gif-box pos1">
+    <img src="/static/images/america.gif" alt="サンプルGIF">
+  </div>
+</div>
+<div class="green-box2">
+  <div class="gif-box2 pos2">
+    <img src="/static/images/america2.gif" alt="サンプルGIF2">
+  </div>
 </div>
 
 <div class="doubleMine-box" id="doubleBox">
