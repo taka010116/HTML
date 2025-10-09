@@ -108,20 +108,33 @@
         const div = document.createElement("div");
         div.classList.add("card");
         div.textContent = num;
-        div.addEventListener("click", () => toggleSelect(div, num));
+
+        const img = document.createElement("img");
+        img.style.position = "absolute";
+        img.style.top = "0";
+        img.style.left = "0";
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.opacity = "0.5"; // 半透明
+        img.style.pointerEvents = "none"; // クリックを妨げない
+        div.appendChild(img);
+        div.addEventListener("click", () => toggleSelect(div, num, img));
         cardsDiv.appendChild(div);
       });
       submitBtn.disabled = true;
     }
 
-    function toggleSelect(cardEl, num){
+    function toggleSelect(cardEl, num, imgEl){
       if(selectedCards.includes(num)){
         selectedCards = selectedCards.filter(n => n !== num);
         cardEl.classList.remove("selected");
+        imgEl.src = ""; // 画像削除
       } else {
         if(selectedCards.length < 2){
           selectedCards.push(num);
           cardEl.classList.add("selected");
+          // 画像をセット
+          imgEl.src = isLeader ? "images/thunder.png" : "images/human.png";
         }
       }
       submitBtn.disabled = (selectedCards.length !== 2);
