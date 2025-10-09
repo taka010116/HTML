@@ -189,6 +189,20 @@
 
       updateScoreboard();
 
+      if (myScore >= 50 || opponentScore >= 50) {
+        status.textContent = "ゲーム終了";
+        resultDiv.innerHTML += `
+          <h2>最終結果</h2>
+          <p>あなたのスコア: ${myScore}</p>
+          <p>相手のスコア: ${opponentScore}</p>
+          <p>${myScore > opponentScore ? "🏆 あなたの勝利！" : (myScore === opponentScore ? "引き分け！" : "相手の勝利！")}</p>
+        `;
+        // 次ラウンドボタンを消す
+        const nextBtn = document.getElementById("nextBtn");
+        if (nextBtn) nextBtn.remove();
+        return; // これ以上処理しない
+      }
+
       // ✅ 親だけ「次へ」ボタン表示
       if (isLeader) {
         const nextBtn = document.createElement("button");
