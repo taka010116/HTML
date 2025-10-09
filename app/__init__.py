@@ -199,9 +199,10 @@ def handle_child_choice(data):
 
     #for sid in room["players"]:
     #    emit("round_result", result, room=sid)
-    room["round_data"] = {}
-    print(f"[DEBUG] 結果送信 room={password}, parent={parent_choice}, child={chosen}, score={score}")
+    
 
+    print(f"[DEBUG] 結果送信 room={password}, parent={parent_choice}, child={chosen}, score={score}")
+    room["round_data"] = {}
 
 def generate_room_id():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=6))
@@ -247,7 +248,7 @@ def handle_join_game(data):
         emit("error", {"message": "この部屋は満員です"}, room=sid)
         print(f"[DEBUG] 満員で拒否: room={password}, sid={sid}")
 
-
+#show_vardsを呼ぶ
 @socketio.on("cards_generated")
 def handle_cards(data):
     password = data["password"]
@@ -299,6 +300,34 @@ def handle_request_cards(data):
 
     # ログ用
     print(f"[DEBUG] 新カード: {new_cards}")
+
+@socketio.on("next_round")
+def handle_next_round(data):
+    password = data["password"]
+    room = rooms.get(password)
+
+    if not room or len(room["players"]) < 2:
+        return
+
+    # ラウンド数を進める
+    room["round"] += 1
+    p1, p2 = room["players"]
+
+    # 親子の入れ替え
+    if room["parent"] == p1:
+        room["parent"] = p2
+    else:
+        room["parent"] = p1
+
+    # 両方のプレイヤーに新しい役割を送信
+    parent_sid = room["parent"]
+    child_sid = p1 if room["parent"] == p2 else p2
+
+    emit("role", {"isLeader": True, "room": password}, room=parent_sid)
+    emit("role", {"isLeader": False, "room": password}, room=child_sid)
+
+    print(f"[DEBUG] ラウンド {room['round']} 開始: 親={room['parent']}, 子={child_sid}")
+
 
 
 if __name__ == "__main__":
