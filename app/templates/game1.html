@@ -54,7 +54,7 @@
         <h3>ラウンド ${round}</h3>
         <p>あなたのスコア: ${myScore}</p>
         <p>相手のスコア: ${opponentScore}</p>
-        <p>現在の役割: <strong>${isLeader ? "親" : "子"}</strong></p>
+        <p>現在の役割: <strong>${isLeader ? "防衛" : "攻撃"}</strong></p>
       `;
     }
     //let currentPassword = localStorage.getItem("password");
@@ -110,18 +110,18 @@
         div.classList.add("card");
         div.textContent = num;
 
-        div.style.position = "relative"; // overlay の基準
+        div.style.position = "relative";
 
          // オーバーレイ画像を作成（初期は非表示）
         const img = document.createElement("img");
         img.style.position = "absolute";
         //img.style.top = "50%";
         //img.style.left = "50%";
-        img.style.width = "50%";       // カードサイズの半分
+        img.style.width = "50%";
         img.style.height = "auto";
         //img.style.transform = "translate(-50%, -50%)"; // 中央に配置
-        img.style.opacity = "0.7";     // 半透明
-        img.style.pointerEvents = "none"; // クリックを妨げない
+        img.style.opacity = "0.7"; 
+        img.style.pointerEvents = "none";
         img.src = ""; // 初期は空
         div.appendChild(img);
 
@@ -143,7 +143,6 @@
 
          if(isLeader){
            imgEl.src = "/static/images/thunder.png";
-           // 右下に配置
            imgEl.style.top = "auto";
            imgEl.style.left = "auto";
             imgEl.style.bottom = "5%";
@@ -151,7 +150,6 @@
             imgEl.style.transform = "none";
           } else {
             imgEl.src = "/static/images/human.png";
-            // 左上に配置
             imgEl.style.top = "5%";
             imgEl.style.left = "5%";
             imgEl.style.bottom = "auto";
@@ -173,10 +171,10 @@
         console.log("サーバーに送信した");
 
         cardsDiv.querySelectorAll(".card").forEach(card => {
-        card.style.pointerEvents = "none"; // クリック無効化
-        card.style.opacity = 0.5; // 半透明にして見た目も変える
+        card.style.pointerEvents = "none"; 
+        card.style.opacity = 0.5;
         });
-        submitBtn.disabled = true; // 送信ボタンも無効化
+        submitBtn.disabled = true;
       } else {
         // 子 → 自分の選択を送る
         const chosen = Array.from(document.querySelectorAll(".card.selected")).map(c => c.textContent);
@@ -286,15 +284,31 @@
           <h2>最終結果</h2>
           <p>あなたのスコア: ${myScore}</p>
           <p>相手のスコア: ${opponentScore}</p>
-          <p>${myScore > opponentScore ? "🏆 あなたの勝利！" : (myScore === opponentScore ? "引き分け！" : "相手の勝利！")}</p>
+          <p>${myScore > opponentScore ? "あなたの勝ちです。" : (myScore === opponentScore ? "引き分け！" : "あなたの負けです。")}</p>
         `;
         // 次ラウンドボタンを消す
         const nextBtn = document.getElementById("nextBtn");
         if (nextBtn) nextBtn.remove();
-        return; // これ以上処理しない
+
+        const restartBtn = document.createElement("button");
+        restartBtn.textContent = "もう一度やりますか？";
+        restartBtn.id = "restartBtn";
+        restartBtn.style.marginTop = "20px";
+        document.body.appendChild(restartBtn);
+        if( isLeader ){
+        restartBtn.addEventListener("click", () => {
+          // スコアとラウンドをリセット
+          myScore = 0;
+          opponentScore = 0;
+          round = 1;
+          resultDiv.innerHTML = "";
+          status.textContent = "";
+          restartBtn.remove();
+          socket.emit("next_round", { password: currentPassword });
+        });
+        }
       }
 
-      // ✅ 親だけ「次へ」ボタン表示
       if (isLeader) {
         const nextBtn = document.createElement("button");
         nextBtn.textContent = "次のラウンドへ ▶";
@@ -306,7 +320,7 @@
           nextBtn.remove();
           resultDiv.innerHTML = "";
           round++;
-          isLeader = !isLeader; // 役割交代
+          isLeader = !isLeader;
           updateScoreboard();
         });
       } else {
@@ -314,10 +328,9 @@
       }
     });
 
-      // ラウンド終了後に呼ばれる
     function nextRound() {
       round++;
-      isLeader = !isLeader; // 役割交代
+      isLeader = !isLeader;
       electedCards = [];
       resultDiv.innerHTML = "";
 
@@ -326,16 +339,14 @@
         return;
       }
 
-      // カード再生成
       cardNumbers = generateCards();
       renderCards(cardNumbers);
 
-      // 状態更新
       if (isLeader) {
         status.textContent = `第${round}ラウンド：あなたは防衛側です。2枚選んでください。`;
       } else {
         status.textContent = `第${round}ラウンド：あなたは攻撃側です。防衛側の選択待ち…`;
-        socket.emit("request_cards", { password: currentPassword }); // 攻撃側が新カード要求
+        socket.emit("request_cards", { password: currentPassword });
       }
 
       updateScoreboard();
@@ -343,22 +354,19 @@
 
     // 10ラウンド終了後
     function showFinalResult() {
-      status.textContent = "🎉 ゲーム終了 🎉";
+      status.textContent = "ゲーム終了";
       resultDiv.innerHTML = `
         <h2>最終結果</h2>
         <p>あなたのスコア: ${myScore}</p>
         <p>相手のスコア: ${opponentScore}</p>
-        <p>${myScore > opponentScore ? "🏆 あなたの勝利！" : (myScore === opponentScore ? "引き分け！" : "相手の勝利！")}</p>
+        <p>${myScore > opponentScore ? "あなたの勝ちです" : (myScore === opponentScore ? "引き分け！" : "あなたの負けです。")}</p>
       `;
     }
 
-
-    // 結果を表示
     socket.on("game_result", data => {
       status.textContent = `結果: 防衛側 ${data.parent}, 攻撃側 ${data.child}, 攻撃側の得点: ${data.score}`;
     });
 
-    // 1〜9のランダム4枚（重複なし）
     function generateCards(){
       let nums = [];
       while(nums.length < 4){
