@@ -214,6 +214,15 @@
       `;
       }
 
+      // カードコンテナを先に作成して append
+      const cardsContainer = document.createElement("div");
+      cardsContainer.id = "result-cards";
+      cardsContainer.style.display = "flex";
+      cardsContainer.style.justifyContent = "center";
+      cardsContainer.style.gap = "10px";
+      cardsContainer.style.flexWrap = "wrap";
+      resultDiv.appendChild(cardsContainer);
+      
       round_cards.forEach(num => {
         const div = document.createElement("div");
         div.classList.add("card");
