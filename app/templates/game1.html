@@ -214,35 +214,35 @@
       `;
       }
 
-      const allCards = parent_choice.map((num, i) => {
+      round_cards.forEach(num => {
         const div = document.createElement("div");
         div.classList.add("card");
-        div.style.position = "relative";
+        div.style.position = "relative"; // overlayの基準
         div.textContent = num;
 
-        // 防御側サンダー画像（右下）
-        const thunderImg = document.createElement("img");
-        thunderImg.src = "/static/images/thunder.png";
-        thunderImg.style.position = "absolute";
-        thunderImg.style.width = "50%";
-        thunderImg.style.height = "auto";
-        thunderImg.style.bottom = "5%";
-        thunderImg.style.right = "5%";
-        div.appendChild(thunderImg);
+        // オーバーレイ画像作成（初期は非表示）
+        const img = document.createElement("img");
+          img.style.position = "absolute";
+        img.style.width = "50%";
+        img.style.height = "auto";
+        img.style.opacity = "0.7";
+        img.style.pointerEvents = "none";
 
-        // 攻撃側人間画像（左上）
-        const humanImg = document.createElement("img");
-        humanImg.src = "/static/images/human.png";
-        humanImg.style.position = "absolute";
-        humanImg.style.width = "50%";
-        humanImg.style.height = "auto";
-        humanImg.style.top = "5%";
-        humanImg.style.left = "5%";
-        div.appendChild(humanImg);
+        // 配置位置
+        if(parent_choice.includes(num)) {
+          img.src = "/static/images/thunder.png";
+          img.style.bottom = "5%";
+          img.style.right = "5%";
+        }
+        if(child_choice.includes(num)) {
+          img.src = "/static/images/human.png";
+          img.style.top = "5%";
+          img.style.left = "5%";
+        }
 
-        return div;
+        div.appendChild(img);
+        resultDiv.appendChild(div);
       });
-      allCards.forEach(card => resultDiv.appendChild(card));
       
       if (isLeader) {
         opponentScore += score_child;
