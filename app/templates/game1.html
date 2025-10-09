@@ -114,11 +114,11 @@
          // オーバーレイ画像を作成（初期は非表示）
         const img = document.createElement("img");
         img.style.position = "absolute";
-        img.style.top = "50%";
-        img.style.left = "50%";
+        //img.style.top = "50%";
+        //img.style.left = "50%";
         img.style.width = "50%";       // カードサイズの半分
         img.style.height = "auto";
-        img.style.transform = "translate(-50%, -50%)"; // 中央に配置
+        //img.style.transform = "translate(-50%, -50%)"; // 中央に配置
         img.style.opacity = "0.7";     // 半透明
         img.style.pointerEvents = "none"; // クリックを妨げない
         img.src = ""; // 初期は空
@@ -139,13 +139,29 @@
         if(selectedCards.length < 2){
           selectedCards.push(num);
           cardEl.classList.add("selected");
-          // 画像をセット
-          imgEl.src = isLeader ? "/static/images/thunder.png" : "/static/images/human.png";
+
+         if(isLeader){
+           imgEl.src = "/static/images/thunder.png";
+           // 右下に配置
+           imgEl.style.top = "auto";
+           imgEl.style.left = "auto";
+            imgEl.style.bottom = "5%";
+            imgEl.style.right = "5%";
+            imgEl.style.transform = "none";
+          } else {
+            imgEl.src = "/static/images/human.png";
+            // 左上に配置
+            imgEl.style.top = "5%";
+            imgEl.style.left = "5%";
+            imgEl.style.bottom = "auto";
+            imgEl.style.right = "auto";
+            imgEl.style.transform = "none";
+          }
         }
       }
+
       submitBtn.disabled = (selectedCards.length !== 2);
     }
-
     // 選択送信ボタン
     
     submitBtn.addEventListener("click", () => {
