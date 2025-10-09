@@ -342,7 +342,7 @@ def handle_next_round(data):
     #    "message": f"Round {room['round']} start!"
     #}, room=password)
 
-    print(f"✅ Round {room['round']} が開始しました（{room['parent']} が親）")
+    print(f"✅ Round {room['round']} が開始しました（{room['leader']} が親）")
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000)
