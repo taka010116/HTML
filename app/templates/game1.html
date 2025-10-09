@@ -188,31 +188,7 @@
 
     socket.on("round_result", (data) => {
       const { parent_choice, child_choice, score_child, round_cards } = data;
-      resultDiv.innerHTML = `
-        <p>防衛側の選んだカード: ${parent_choice.join(", ")}</p>
-        <p>攻撃側の選んだカード: ${child_choice.join(", ")}</p>
-        <p>攻撃側の得点: ${score_child}</p>
-      `;
-
-      console.log("攻撃側の得点", score_child);
-      console.log("防衛側の選択", parent_choice);
-
-      let score_parent = 0; 
-      if( score_child === 0){
-        score_parent = 10;
-        resultDiv.innerHTML = `
-        <p>防衛側の選んだカード: ${parent_choice.join(", ")}</p>
-        <p>攻撃側の選んだカード: ${child_choice.join(", ")}</p>
-        <p>攻撃側の得点: ${score_child}</p>
-        <p>防御側ボーナス: ${score_parent}</p>
-      `;
-      }else{
-        resultDiv.innerHTML = `
-        <p>防衛側の選んだカード: ${parent_choice.join(", ")}</p>
-        <p>攻撃側の選んだカード: ${child_choice.join(", ")}</p>
-        <p>攻撃側の得点: ${score_child}</p>
-      `;
-      }
+      
 
       // カードコンテナを先に作成して append
       const cardsContainer = document.createElement("div");
@@ -236,7 +212,7 @@
         div.style.fontWeight = "bold";
         div.textContent = num;
 
-        if(parent_choice.includes(num)) {
+        if(parent_choice.map(String).includes(String(num))) {
           const img = document.createElement("img");
           img.src = "/static/images/thunder.png";
           img.style.position = "absolute";
@@ -266,6 +242,32 @@
         cardsContainer.appendChild(div);
       });
 
+      resultDiv.innerHTML = `
+        <p>防衛側の選んだカード: ${parent_choice.join(", ")}</p>
+        <p>攻撃側の選んだカード: ${child_choice.join(", ")}</p>
+        <p>攻撃側の得点: ${score_child}</p>
+      `;
+
+      console.log("攻撃側の得点", score_child);
+      console.log("防衛側の選択", parent_choice);
+
+      let score_parent = 0; 
+      if( score_child === 0){
+        score_parent = 10;
+        resultDiv.innerHTML = `
+        <p>防衛側の選んだカード: ${parent_choice.join(", ")}</p>
+        <p>攻撃側の選んだカード: ${child_choice.join(", ")}</p>
+        <p>攻撃側の得点: ${score_child}</p>
+        <p>防御側ボーナス: ${score_parent}</p>
+      `;
+      }else{
+        resultDiv.innerHTML = `
+        <p>防衛側の選んだカード: ${parent_choice.join(", ")}</p>
+        <p>攻撃側の選んだカード: ${child_choice.join(", ")}</p>
+        <p>攻撃側の得点: ${score_child}</p>
+      `;
+      }
+      
       if (isLeader) {
         opponentScore += score_child;
         myScore += score_parent;
