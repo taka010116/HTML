@@ -199,7 +199,7 @@
       cardsContainer.style.gap = "10px";
       cardsContainer.style.flexWrap = "wrap";
       resultDiv.appendChild(cardsContainer);
-      //cardsDiv.innerHTML = "";
+      cardsDiv.innerHTML = "";
 
       round_cards.forEach(num => {
         const div = document.createElement("div");
@@ -228,7 +228,7 @@
         }
 
         // 攻撃側オーバーレイ
-        if(child_choice.includes(num)) {
+        if(child_choice.map(String).includes(String(num))) {
           const img = document.createElement("img");
           img.src = "/static/images/human.png";
           img.style.position = "absolute";
