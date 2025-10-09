@@ -180,7 +180,7 @@
     /* ボックス内にGIFを埋め込む共通クラス */
   .gif-box {
     position: relative;
-    width: 100%;
+    width: 120px;
     height: 120px;              /* 高さは自由に調整可能 */
     overflow: hidden;           /* はみ出しを非表示 */
     border-radius: 8px;         /* 角を丸く */
@@ -191,8 +191,8 @@
 
   .gif-box2 {
     position: relative;
-    width: 10%;
-    height: 120px;              /* 高さは自由に調整可能 */
+    width: 150px;
+    height: 150px;              /* 高さは自由に調整可能 */
     overflow: hidden;           /* はみ出しを非表示 */
     border-radius: 8px;         /* 角を丸く */
     margin-bottom: 10px;        /* 下のテキストとの余白 */
@@ -200,7 +200,7 @@
   }
 
   .pos1 {
-    transform: translate(-200%, -100%);
+    transform: translate(100%, -100%);
   }
 
   .pos2 {
@@ -287,16 +287,15 @@
   <img src="/static/images/sky.gif" alt="GIF">
 </div>
 </div>
-<div class="green-box">
-  <div class="gif-box pos1">
-    <img src="/static/images/america.gif" alt="サンプルGIF">
-  </div>
+
+<div class="gif-box pos1">
+  <img src="/static/images/america.gif" alt="サンプルGIF">
 </div>
-<div class="green-box2">
-  <div class="gif-box2 pos2">
-    <img src="/static/images/america2.gif" alt="サンプルGIF2">
-  </div>
+
+<div class="gif-box2 pos2">
+ <img src="/static/images/america2.gif" alt="サンプルGIF2">
 </div>
+
 
 <div class="doubleMine-box" id="doubleBox">
   Double MINE <br>
