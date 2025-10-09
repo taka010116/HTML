@@ -53,7 +53,10 @@
       currentPassword = passwordInput.value;
       currentUsername = usernameInput.value || generateRandomUsername();
       console.log("開始ボタンを押しました。");
-      socket.emit("join", { password: currentPassword });
+      socket.emit("join", {
+        password: currentPassword,
+        username: currentUsername
+       });
     });
 
     socket.on("login_result", (data) => {

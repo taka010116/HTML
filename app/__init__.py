@@ -27,6 +27,7 @@ app = create_app()
 @socketio.on("join")
 def handle_join(data):
     password = data.get("password")
+    username = data.get("username")
     if not password:
         emit("login_result", {"status": "error"}, room=request.sid)
         return
@@ -41,12 +42,14 @@ def handle_join(data):
         rooms[password] = {
             "in_progress": False,
             "choices": {},
-            "players": []
+            "players": [],
+            "usernames": {}
         }
 
     if request.sid not in rooms[password]["players"]:
         rooms[password]["players"].append(request.sid)
-    
+        rooms[password]["usernames"][request.sid] = username 
+
     join_room(password)
 
     #players = waiting_rooms[password]
@@ -57,12 +60,16 @@ def handle_join(data):
         is_leader = (sid == leader_sid)
         emit("login_result", {"status": "ready", "isLeader": is_leader}, room=sid)
 
+    broadcast_players(password)
     # プレイヤーリスト更新
-    emit("update_players", {"players": players}, room=password)
+    #emit("update_players", {"players": players}, room=password)
 
 def broadcast_players(password):
-    players = rooms[password]["players"]
-    player_names = [f"Player{i+1}" for i in range(len(players))]
+    """ルーム内全員にユーザー名一覧を送信"""
+    if password not in rooms:
+        return
+    user_map = rooms[password]["usernames"]
+    player_names = [user_map[sid] for sid in rooms[password]["players"] if sid in user_map]
     emit("update_players", {"players": player_names}, room=password)
 
 #最初
