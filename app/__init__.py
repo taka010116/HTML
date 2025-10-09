@@ -320,9 +320,9 @@ def handle_next_round(data):
         return
 
     # 親子を入れ替える
-    old_parent = room["parent"]
+    old_parent = room["laeder"]
     old_child = room["child"]
-    room["parent"], room["child"] = old_child, old_parent
+    room["leader"], room["child"] = old_child, old_parent
 
     # ラウンド数を進める
     room["round"] = room.get("round", 1) + 1
@@ -330,7 +330,7 @@ def handle_next_round(data):
     print(f"[ROUND] 次のラウンド開始: {password}, Round={room['round']}")
     print(f"👑 新しい親: {room['leader']} / 🎯 新しい子: {room['child']}")
 
-    
+
     # 親と子に新しい役割を通知
     emit("role", {"role": "parent", "isLeader": True, "room_id": password}, room=room["parent"])
     emit("role", {"role": "child", "isLeader": False, "room_id": password}, room=room["child"])
