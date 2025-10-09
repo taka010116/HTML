@@ -304,31 +304,39 @@ def handle_request_cards(data):
 @socketio.on("next_round")
 def handle_next_round(data):
     password = data["password"]
-    room = rooms.get(password)
 
-    if not room or len(room["players"]) < 2:
+    if password not in rooms:
+        print("❌ ルームが見つかりません:", password)
         return
 
+    room = rooms[password]
+    print("🎮 現在のルーム情報:", room)
+
+    # 親子が存在するか確認
+    if "parent" not in room or "child" not in room:
+        print("❌ parent / child が設定されていません")
+        return
+
+    # 親子を入れ替える
+    old_parent = room["parent"]
+    old_child = room["child"]
+    room["parent"], room["child"] = old_child, old_parent
+
     # ラウンド数を進める
-    room["round"] += 1
-    p1, p2 = room["players"]
+    room["round"] = room.get("round", 1) + 1
 
-    # 親子の入れ替え
-    if room["parent"] == p1:
-        room["parent"] = p2
-    else:
-        room["parent"] = p1
+    # 親と子に新しい役割を通知
+    emit("role", {"role": "parent", "isLeader": True, "room_id": password}, room=room["parent"])
+    emit("role", {"role": "child", "isLeader": False, "room_id": password}, room=room["child"])
 
-    # 両方のプレイヤーに新しい役割を送信
-    parent_sid = room["parent"]
-    child_sid = p1 if room["parent"] == p2 else p2
+    # 全員に次ラウンド開始を通知
+    #emit("new_round", {
+    #    "round": room["round"],
+   #     "scores": room.get("scores", {}),
+    #    "message": f"Round {room['round']} start!"
+    #}, room=password)
 
-    emit("role", {"isLeader": True, "room": password}, room=parent_sid)
-    emit("role", {"isLeader": False, "room": password}, room=child_sid)
-
-    print(f"[DEBUG] ラウンド {room['round']} 開始: 親={room['parent']}, 子={child_sid}")
-
-
+    print(f"✅ Round {room['round']} が開始しました（{room['parent']} が親）")
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000)
