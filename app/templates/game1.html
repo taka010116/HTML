@@ -187,7 +187,7 @@
     });
 
     socket.on("round_result", (data) => {
-      const { parent_choice, child_choice, score_child } = data;
+      const { parent_choice, child_choice, score_child, round_cards } = data;
       resultDiv.innerHTML = `
         <p>防衛側の選んだカード: ${parent_choice.join(", ")}</p>
         <p>攻撃側の選んだカード: ${child_choice.join(", ")}</p>
@@ -243,7 +243,7 @@
         div.appendChild(img);
         resultDiv.appendChild(div);
       });
-      
+
       if (isLeader) {
         opponentScore += score_child;
         myScore += score_parent;

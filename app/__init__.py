@@ -139,6 +139,9 @@ def handle_parent_choice(data):
     chosen = data.get("chosen", [])
     cards = data.get("cards", [])
 
+    if "round_data" not in room:
+        room["round_data"] = {}
+
     # leader と child を room に保存（初回のみ）
     if "leader" not in room:
         room["leader"] = room["players"][0]
@@ -151,6 +154,7 @@ def handle_parent_choice(data):
     # 部屋ごとの round_data に保存
     #room["round_data"] = {"parent_choice": chosen}
     room["round_data"]["parent_choice"] = chosen
+    room["round_data"]["round_cards"] = cards
     print("親の選択parent")
     print(room["round_data"]["parent_choice"])
 
@@ -171,14 +175,15 @@ def handle_child_choice(data):
 
     chosen = data.get("chosen", [])
     parent_choice = room.get("round_data", {}).get("parent_choice", [])
-
+    round_cards = room.get("round_data", {}).get("round_cards", [])
     parent_set = set(map(int, parent_choice))
     score = sum(int(c) for c in chosen if int(c) not in parent_set)
 
     result = {
         "parent_choice": parent_choice,
         "child_choice": chosen,
-        "score_child": score
+        "score_child": score,
+        "round_cards": round_cards
     }
 
     print("親の選択")
