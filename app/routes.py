@@ -71,10 +71,34 @@ def login():
 
 @main.route("/account")
 def account():
-    if "user_id" not in session:
-        flash("ログインしてください。")
-        return redirect(url_for("main.login"))
-    return render_template("account.html", username=session["username"])
+    username = session.get("username")
+    if not username:
+        return redirect("/login")
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("SELECT username, wins, losses, draws, avatar, bio FROM users WHERE username=?", (username,))
+    user = c.fetchone()
+    conn.close()
+
+    return render_template("account.html", user=user)
+
+@main.route("/account/update", methods=["POST"])
+def update_account():
+    username = session.get("username")
+    if not username:
+        return redirect("/login")
+
+    avatar = request.form.get("avatar", "(´・ω・`)")
+    bio = request.form.get("bio", "")[:100]  # 100文字制限
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("UPDATE users SET avatar=?, bio=? WHERE username=?", (avatar, bio, username))
+    conn.commit()
+    conn.close()
+
+    return redirect("/account")
 
 @main.route("/logout")
 def logout():
