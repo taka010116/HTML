@@ -84,7 +84,7 @@ def account():
     return render_template("account.html", user=user)
 
 @main.route("/account/update", methods=["POST"])
-def update_account():
+def account():
     username = session.get("username")
     if not username:
         return redirect("/login")
