@@ -95,6 +95,11 @@ app.register_blueprint(main)
 if __name__ == "__main__":
     app.run(debug=True)
 
+if __name__ == "__main__":
+    from app.database import init_db
+    init_db()  # ← データベース初期化
+    app.run(debug=True)
+    
 """
 @socketio.on("message")
 def handle_message(data):
