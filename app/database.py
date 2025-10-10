@@ -17,3 +17,4 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+    print("✅ users テーブルを作成しました")

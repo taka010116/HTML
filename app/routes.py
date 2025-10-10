@@ -1,6 +1,7 @@
 from flask import Blueprint, redirect, url_for, Flask, jsonify, render_template, flash, render_template_string, request,g, session
 from app.database import get_db, init_db
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
 #from flask_socketio import emit
 #from app import socketio
 app = Flask(__name__)
@@ -22,6 +23,14 @@ def game1():
 
 
 #ここから下データベース
+
+if not os.path.exists("users.db"):
+    print("🗂 users.db が存在しないため作成します...")
+    init_db()
+else:
+    print("✅ users.db は既に存在します")
+
+
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
