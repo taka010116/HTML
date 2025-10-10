@@ -2,6 +2,7 @@ from flask import Blueprint, redirect, url_for, Flask, jsonify, render_template,
 from app.database import get_db, init_db
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import sqlite3 
 #from flask_socketio import emit
 #from app import socketio
 app = Flask(__name__)
@@ -69,15 +70,14 @@ def login():
             flash("ユーザー名またはパスワードが間違っています。")
     return render_template("login.html")
 
-@main.route("/account")
+@app.route("/account")
 def account():
-    username = session.get("username")
-    if not username:
-        return redirect("/login")
+    if "username" not in session:
+        return redirect(url_for("main.login"))
 
-    conn = sqlite3.connect("users.db")
+    conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT username, wins, losses, draws, avatar, bio FROM users WHERE username=?", (username,))
+    c.execute("SELECT * FROM users WHERE username = ?", (session["username"],))
     user = c.fetchone()
     conn.close()
 
