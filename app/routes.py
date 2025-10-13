@@ -23,7 +23,7 @@ def game1():
     return render_template("game1.html")
 
 @main.route("/kari")
-def game1():
+def kari():
     return render_template("diary.html")
 
 
