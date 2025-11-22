@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}アーカイブ{% endblock %}
+
+{% block content %}
+
+<head>
+  <meta charset="utf-8">
+  <title>アーカイブ - 西暦2525年</title>
+  <meta name="description" content="過去のコンテンツやリンクをまとめたアーカイブページです。">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<style>
+  body {
+    font-family: "Arial", "Yu Gothic", sans-serif;
+    position: relative;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    overflow: hidden;
+  }
+
+  h1 {
+    text-align: center;
+    margin-top: 30px;
+  }
+
+  .archive-box {
+    position: absolute;
+    padding: 15px;
+    border: 2px solid #000;
+    background-color: #fff;
+    box-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    transition: transform 0.2s;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .archive-box:active {
+    cursor: grabbing;
+  }
+
+  .archive-box a {
+    display: block;
+    margin-top: 5px;
+    text-decoration: none;
+    color: #0077ff;
+    font-weight: bold;
+  }
+
+  .archive-box a:hover {
+    color: #ff4400;
+  }
+</style>
+
+<h1>アーカイブ</h1>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const archiveData = [
+    { title: "記事1", desc: "2025年1月の記事", link: "/archive/article1" },
+    { title: "記事2", desc: "2025年2月の記事", link: "/archive/article2" },
+    { title: "記事3", desc: "ゲームレビュー", link: "/archive/game" },
+    { title: "記事4", desc: "その他情報", link: "/archive/other" },
+    { title: "記事5", desc: "過去イベント", link: "/archive/event" },
+    { title: "記事6", desc: "特集記事", link: "/archive/special" }
+  ];
+
+  const boxes = [];
+
+  function isTooOverlapping(newBox) {
+    return boxes.some(box => {
+      const dx = Math.abs(newBox.x - box.x);
+      const dy = Math.abs(newBox.y - box.y);
+      return dx < (newBox.width * 0.7 + box.width * 0.7) / 2 &&
+             dy < (newBox.height * 0.7 + box.height * 0.7) / 2;
+    });
+  }
+
+  archiveData.forEach(data => {
+    let x, y, width, height, newBox;
+    do {
+      width = Math.floor(Math.random() * 150) + 120;
+      height = Math.floor(Math.random() * 120) + 100;
+      x = Math.random() * (window.innerWidth - width - 20);
+      y = Math.random() * (window.innerHeight - height - 20);
+      newBox = {x, y, width, height};
+    } while(isTooOverlapping(newBox));
+
+    const boxEl = document.createElement("div");
+    boxEl.className = "archive-box";
+    boxEl.style.left = x + "px";
+    boxEl.style.top = y + "px";
+    boxEl.style.width = width + "px";
+    boxEl.style.height = height + "px";
+    boxEl.innerHTML = `<strong>${data.title}</strong><br>${data.desc}<a href="${data.link}">詳しく見る</a>`;
+    document.body.appendChild(boxEl);
+    boxes.push(newBox);
+
+    // ドラッグ処理
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    boxEl.addEventListener("mousedown", e => {
+      isDragging = true;
+      offsetX = e.clientX - boxEl.offsetLeft;
+      offsetY = e.clientY - boxEl.offsetTop;
+      boxEl.style.zIndex = 1000; // 前面に
+    });
+
+    document.addEventListener("mousemove", e => {
+      if (!isDragging) return;
+      boxEl.style.left = (e.clientX - offsetX) + "px";
+      boxEl.style.top = (e.clientY - offsetY) + "px";
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (isDragging) {
+        isDragging = false;
+        boxEl.style.zIndex = "";
+      }
+    });
+  });
+});
+</script>
+
+{% endblock %}
